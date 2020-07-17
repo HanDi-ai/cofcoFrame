@@ -1514,7 +1514,7 @@ public class BillController extends BaseController {
         BillOperatorEntity billOperatorEntity = new BillOperatorEntity();
         BillFlowEntity billFlowEntity = new BillFlowEntity();
         int id = billService.seqBillOperatorId();
-        //操作表
+        //操作表22
         billOperatorEntity.setId(String.valueOf(id));
         //质押1预冻结提交，仓库锁货中
         billOperatorEntity.setOperatorType(Const.PRE_FREEZING);
