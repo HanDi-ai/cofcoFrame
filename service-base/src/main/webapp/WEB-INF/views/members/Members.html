@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>仓单备案</title>
+    #parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2">
+                <input  type="hidden"  @keyup.enter="query" v-model="q.organId" >
+                <div class="form-group">
+                    <input class="form-control" v-model="q.varietyName" @keyup.enter="query" placeholder="成员名称">
+                </div>
+            </div>
+
+            <button class="layui-btn" @click="query"><i class="layui-icon">&#xe615;</i>查 询</button>
+
+            <button class="layui-btn" @click="add" type="button"><i class="layui-icon">&#xe61f;</i> 新 增</button>
+
+            <button class="layui-btn layui-btn-normal" type="button" @click="update"><i class="layui-icon">&#xe642;</i>编辑</button>
+
+            <button class="layui-btn" @click="del"><i class="layui-icon">&#xe615;</i>删除</button>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+        <div id="page"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+
+            <div class="form-group">
+                <div class="col-sm-4 control-label">是否指定交割仓库<span style="color: red">*</span></div>
+                <label class="radio-inline">
+                    <input type="radio" name="isDelivery" value="0" v-model="role.isDelivery"/> 否
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isDelivery" value="1" v-model="role.isDelivery"/> 是
+                </label>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">仓库类型<span style="color: red">*</span></div>
+                <div class="col-sm-8" style="padding-right: 0px;">
+                    <select  id="whType"  v-model="role.whType" class="form-control">
+                        <option value="0">基准库</option>
+                        <option value="1">延伸库</option>
+                        <option value="2">集团库</option>
+                        <option value="3">分库|其他</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">库名称:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input class="form-control" v-model="role.whName" placeholder="库名称"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">库简称<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.whAbbr" placeholder="库简称"/>
+                </div>
+                <div class="col-sm-2 control-label">注册地址<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.regAddr" placeholder="注册地址"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">办公地址<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.officeAddr" placeholder="办公地址"/>
+                </div>
+                <div class="col-sm-2 control-label">联系电话<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.tel" placeholder="联系电话"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">组织机构代码<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input class="form-control" v-model="role.orgNo" placeholder="组织机构代码"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">经营性质<span style="color: red">*</span></div>
+                <div class="col-sm-8" >
+                    <select  id="property"  v-model="role.property" class="form-control">
+                        <option value="0">国有</option>
+                        <option value="1">集体</option>
+                        <option value="2">私营</option>
+                        <option value="3">联营</option>
+                        <option value="4">其他</option>
+                    </select>
+                </div>
+                <!-- <div class="col-sm-2 control-label">经营性质:<span style="color: red">*</span></div>
+                 <div>
+                     <div class="col-sm-8" style="padding-right: 0px;">
+                         <select id="property" v-model="role.property" class="form-control" style="padding-left: 6px;">
+                             <option value=""></option>
+                             <option value="0">国有</option>
+                             <option value="1">集体</option>
+                             <option value="2">私营</option>
+                             <option value="3">联营</option>
+                             <option value="4">其他</option>
+                         </select>
+                     </div>-->
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">产品类型<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.productType" placeholder="产品类型"/>
+                </div>
+                <div class="col-sm-2 control-label">产品种类<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.productCategory" placeholder="产品种类"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">开户银行<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.bankName" placeholder="开户银行"/>
+                </div>
+                <div class="col-sm-2 control-label">银行账号<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.bankAccount" placeholder="银行账号"/>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">注册资金<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.regMoney" placeholder="注册资金"/>
+                </div>
+                <div class="col-sm-2 control-label">总资产<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.totalAsset" placeholder="总资产"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">固定资产<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.fixedAsset" placeholder="固定资产"/>
+                </div>
+                <div class="col-sm-2 control-label">净资产<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.netAsset"  placeholder="净资产">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">法人代表姓名<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.corporateName" placeholder="法人代表姓名">
+                </div>
+                <div class="col-sm-2 control-label">法人代表电话<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.corporateTel" placeholder="法人代表电话"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-4 control-label">法人代表身份证号码<span style="color: red">*</span></div>
+                <div class="col-sm-7">
+                    <input class="form-control"  v-model="role.corporateId" type="text" placeholder="法人代表身份证号码">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">联系人姓名<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.contactName" placeholder="联系人姓名"/>
+                </div>
+                <div class="col-sm-2 control-label">联系人电话<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.contactTel" placeholder="联系人电话"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-4 control-label">联系人身份证号码<span style="color: red">*</span></div>
+                <div class="col-sm-7">
+                    <input class="form-control" v-model="role.contactId" placeholder="联系人身份证号码"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+
+                <div class="col-sm-2 control-label">是否为租赁库<span style="color: red">*</span></div>
+                <label class="radio-inline">
+                    <input type="radio" name="isLease" value="0" v-model="role.isLease"/> 否
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isLease" value="1" v-model="role.isLease"/> 是
+                </label>
+
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-4 control-label">租赁起始日期<span style="color: red">*</span></div>
+                <div class="col-sm-7">
+                    <input  class="form-control" id="leaseBeginDate" v-model="role.leaseBeginDate" placeholder="租赁起始日期">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-4 control-label">租赁终止日期<span style="color: red">*</span></div>
+                <div class="col-sm-7">
+                    <input  class="form-control" id="leaseEndDate"  v-model="role.leaseEndDate" placeholder="租赁终止日期">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">库房面积<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.houseArea" placeholder="库房面积"/>
+                </div>
+                <div class="col-sm-2 control-label">水泥硬化地面面积<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.cementArea" placeholder="水泥硬化地面面积"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">总堆储能力<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.totHeapQty" placeholder="总堆储能力"/>
+                </div>
+                <div class="col-sm-2 control-label">期货堆储能力<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.ftrHeapQty" placeholder="期货堆储能力"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">散粮堆储能力<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.bulkHeapQty" placeholder="散粮堆储能力"/>
+                </div>
+                <div class="col-sm-2 control-label">地磅吨数<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.loadometerTon" placeholder="地磅吨数"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">上级仓库类型<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input class="form-control" v-model="role.upperType" type="text" placeholder="上级仓库类型">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">上级仓库名称<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.upperName" type="text" placeholder="上级仓库名称">
+                </div>
+                <div class="col-sm-2 control-label">上级仓库简称<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.upperAbbr" type="text" placeholder="上级仓库简称">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">上级仓库联系电话<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.upperTel" type="text" placeholder="上级仓库联系电话">
+                </div>
+                <div class="col-sm-2 control-label">上级仓库地址<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.upperAddr" type="text" placeholder="上级仓库地址">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-4 control-label">上级仓库组织机构代码<span style="color: red">*</span></div>
+                <div class="col-sm-7">
+                    <input class="form-control" v-model="role.upperOrgNo" type="text" placeholder="上级仓库组织机构代码">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">上级仓库法人代表姓名<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.upperCorporateName" type="text" placeholder="上级仓库法人代表姓名">
+                </div>
+                <div class="col-sm-2 control-label">库区面积<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.regionArea" placeholder="库区面积"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-4 control-label">营业执照:<span style="color: red">*</span></div>
+                <div class="col-sm-5" style="padding-right:0px;">
+                    <div class="layui-upload-drag" id="orgAttach" style="display:block;padding: 12px;">
+                        <i class="layui-icon"></i>
+                        <p>点击上传，或将文件拖拽到此处</p>
+                    </div>
+                </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 118px;" id="orgAttachImg" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                    <div class="col-sm-4 control-label">法人代表身份证附件:<span style="color: red">*</span></div>
+                    <div class="col-sm-5" style="padding-right:0px;">
+                        <div class="layui-upload-drag" id="corporateIdAttach" style="display:block;padding: 12px;">
+                            <i class="layui-icon"></i>
+                            <p>点击上传，或将文件拖拽到此处</p>
+                        </div>
+                    </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 118px;" id="corporateIdAttachImg" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                    <div class="col-sm-4 control-label">联系人身份证附件:<span style="color: red">*</span></div>
+                    <div class="col-sm-5" style="padding-right:0px;">
+                        <div class="layui-upload-drag" id="contactIdAttach" style="display:block;padding: 12px;">
+                            <i class="layui-icon"></i>
+                            <p>点击上传，或将文件拖拽到此处</p>
+                        </div>
+                    </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 118px;" id="contactIdAttachImg" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                    <div class="col-sm-4 control-label">库平面图:<span style="color: red">*</span></div>
+                    <div class="col-sm-5" style="padding-right:0px;">
+                        <div class="layui-upload-drag" id="positionDiagram" style="display:block;padding: 12px;">
+                            <i class="layui-icon"></i>
+                            <p>点击上传，或将文件拖拽到此处</p>
+                        </div>
+                    </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 118px;" id="positionDiagramImg" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                    <div class="col-sm-4 control-label">上级仓库营业执照:<span style="color: red">*</span></div>
+                    <div class="col-sm-5" style="padding-right:0px;">
+                        <div class="layui-upload-drag" id="upperOrgAttach" style="display:block;padding: 12px;">
+                            <i class="layui-icon"></i>
+                            <p>点击上传，或将文件拖拽到此处</p>
+                        </div>
+                    </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 118px;" id="upperOrgAttachImg" >
+                </div>
+            </div>
+
+
+            <div class="form-group" style="margin-left: 30%;margin-top: 30px;">
+                <button class="layui-btn" type="button" @click="saveOrUpdate" >确定</button>
+                <button class="layui-btn layui-btn-warm" type="button" @click="reload" style="margin-left: 30px">返回</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 选择机构 -->
+<div id="menuLayer" style="display: none; position: 10px;">
+    <ul id="organTree" class="ztree"></ul>
+</div>
+<script src="${rc.contextPath}/statics/js/members/members.js"></script>
+</body>
+</html>

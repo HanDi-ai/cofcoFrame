@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.role.RoleAssignmentDao">
+
+    <resultMap type="com.cofco.sys.entity.role.RoleEntity" id="roleMap">
+        <result property="id" column="id"/>
+        <result property="bapid" column="bapid"/>
+        <result property="baid" column="baid"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="status" column="status"/>
+        <result property="roleType" column="role_type"/>
+        <result property="remark" column="remark"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateId" column="update_id"/>
+        <result property="createId" column="create_id"/>
+    </resultMap>
+
+    <resultMap type="com.cofco.sys.entity.user.UserRoleEntity" id="userRoleMap">
+        <result property="userId" column="user_id"/>
+        <result property="roleId" column="role_id"/>
+    </resultMap>
+
+	<resultMap type="com.cofco.sys.entity.user.UserEntity" id="userMap">
+		<result property="id" column="id"/>
+		<result property="bapid" column="bapid"/>
+		<result property="baid" column="baid"/>
+		<result property="userName" column="user_name"/>
+		<result property="loginName" column="login_name"/>
+		<result property="passWord" column="pass_word"/>
+		<result property="createTime" column="create_time"/>
+		<result property="updateTime" column="update_time"/>
+		<result property="status" column="status"/>
+		<result property="salt" column="salt"/>
+		<result property="phone" column="phone"/>
+		<result property="photo" column="photo"/>
+		<result property="email" column="email"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateId" column="update_id"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+
+    <sql id="Base_Column_List" >
+		id, 
+		name,
+		code, 
+		status, 
+		role_type, 
+		remark, 
+		update_time, 
+		create_time, 
+		update_id, 
+		create_id
+    </sql>
+
+	<!--有此角色的用户列表查询-->
+	<select id="queryListUserYes" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+		select DISTINCT
+		u.id,
+		u.bapid,
+		u.baid,
+		u.user_name,
+		u.login_name,
+		u.pass_word,
+		u.create_time,
+		u.update_time,
+		u.status,
+		u.salt,
+		u.phone,
+		u.photo,
+		u.email,
+		u.create_id,
+		u.update_id,
+		u.remark,
+		(SELECT name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=u.baid) AS baName,
+		(SELECT name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=u.bapid) AS bapName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user u
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role ur on u.id = ur.user_id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role r on r.id = UR.ROLE_ID
+		WHERE u.status != '-1' and ur.ROLE_ID =#{id}
+		<if test="userName != null and userName.trim() != ''" >
+			AND u.user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by u.${sidx} ${order}
+			</when>
+			<otherwise>
+				order by u.update_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--有此角色的用户列表总数据条数查询-->
+	<select id="UserYesTotal"   resultType="int">
+		select
+		count (*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user u
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role ur on u.id = ur.user_id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role r on r.id = UR.ROLE_ID
+		WHERE u.status != '-1' and ur.ROLE_ID =#{id}
+		<if test="userName != null and userName.trim() != ''" >
+			AND u.user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by u.${sidx} ${order}
+			</when>
+			<otherwise>
+				order by u.update_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--无此角色的用户列表查询-->
+	<select id="queryListUserNo" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+		SELECT
+		u.id,
+		u.bapid,
+		u.baid,
+		u.user_name,
+		u.login_name,
+		u.pass_word,
+		u.create_time,
+		u.update_time,
+		u.status,
+		u.salt,
+		u.phone,
+		u.photo,
+		u.email,
+		u.create_id,
+		u.update_id,
+		u.remark,
+		o.simplify_name AS bapName
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER u
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o on o.id=u.bapid
+		WHERE u.id IN
+		(
+				SELECT ID
+				FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER su
+				WHERE su.bapid IN
+				(SELECT SYS_OR.ID
+				FROM (SELECT CODE
+				FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SO
+				WHERE SO.ID =
+				(select sr.bapid
+				FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role sr
+				WHERE sr.id =#{id})) CODE_SIGN
+				INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SYS_OR ON SYS_OR.CODE LIKE
+				CODE_SIGN.CODE || '%')
+
+				UNION
+
+				SELECT USER_ID
+				FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_LEND SL
+				WHERE SL.NEW_ORGAN_ID =
+				(select sr.bapid
+				FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role sr
+				WHERE sr.id =#{id}) AND  SL.STATUS='0'
+		)
+		AND u.status != '-1'
+		and u.id not in
+		(select UR.USER_ID from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role ur where UR.ROLE_ID = #{id})
+		<if test="userName != null and userName.trim() != ''" >
+			AND u.user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by u.${sidx} ${order}
+			</when>
+			<otherwise>
+				order by u.bapid desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--无此角色的用户列表总数据条数查询-->
+	<select id="userTotal"   resultType="int">
+		SELECT
+		count(*)
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER u
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o on o.id=u.bapid
+		WHERE u.id IN
+		(
+		SELECT ID
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER su
+		WHERE su.bapid IN
+		(SELECT SYS_OR.ID
+		FROM (SELECT CODE
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SO
+		WHERE SO.ID =
+		(select sr.bapid
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role sr
+		WHERE sr.id =#{id})) CODE_SIGN
+		INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SYS_OR ON SYS_OR.CODE LIKE
+		CODE_SIGN.CODE || '%')
+
+		UNION
+
+		SELECT USER_ID
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_LEND SL
+		WHERE SL.NEW_ORGAN_ID =
+		(select sr.bapid
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role sr
+		WHERE sr.id =#{id}) AND  SL.STATUS='0'
+		)
+		AND u.status != '-1'
+		and u.id not in
+		(select UR.USER_ID from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role ur where UR.ROLE_ID = #{id})
+		<if test="userName != null and userName.trim() != ''" >
+			AND u.user_name like concat(concat('%',#{userName}),'%')
+		</if>
+
+	</select>
+
+	<!--删除此用户的角色权限-->
+    <delete id="deleteYes" parameterType="com.cofco.sys.entity.user.UserRoleEntity">
+		begin
+		<foreach collection="userList" item="item" index="index" separator=";" >
+			delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role
+			where
+			role_id = #{id}
+			AND
+			user_id =  #{item}
+		</foreach>
+		;end;
+    </delete>
+
+	<!--添加此用户的角色权限-->
+	<insert id="saveNo" parameterType="com.cofco.sys.entity.user.UserRoleEntity">
+		begin
+		<foreach collection="userList" item="item" index="index" separator=";" >
+			insert into <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role
+			(
+			user_id,
+			role_id
+			)
+			values
+			(
+			#{item},
+			#{id}
+			)
+		</foreach>
+		;end;
+	</insert>
+
+	<!--角色列表数据查询-->
+	<select id="queryList" resultType="com.cofco.sys.entity.role.RoleEntity" resultMap="roleMap">
+		select
+		rol.id,
+		rol.name,
+		rol.code,
+		rol.status,
+		rol.role_type,
+		rol.remark,
+		rol.update_time,
+		rol.create_time,
+		rol.update_id,
+		rol.create_id,
+		o.sort,
+		o.type,
+		o.simplify_name AS organName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where rol.status != '-1'
+		<if test="userid != '-1'.toString()" >
+			<include refid="com.cofco.base.dao.UserIdDataAuth_alias"/>
+		</if>
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by rol.${sidx} ${order}
+			</when>
+			<otherwise>
+				order by o.sort,rol.create_time desc
+			</otherwise>
+		</choose>
+
+	</select>
+
+	<!--角色列表数据总条数查询-->
+	<select id="queryTotal" resultType="int">
+		select
+		count (*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where 1=1
+		<if test="userid != '-1'.toString()" >
+			<include refid="com.cofco.base.dao.UserIdDataAuth_alias"/>
+		</if>
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by rol.${sidx} ${order}
+			</when>
+			<otherwise>
+				order by o.sort,rol.create_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+</mapper>

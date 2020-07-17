@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>角色管理</title>
+    #parse("sys/header.html")
+</head>
+<style>
+    img:not([src]) {
+        opacity: 0;
+    }
+</style>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2">
+                <input  type="hidden" @keyup.enter="query" v-model="q.organId" >
+                <div class="form-group">
+                    <input class="form-control" v-model="q.varietyName" @keyup.enter="query" placeholder="客户名称">
+                </div>
+            </div>
+            <!--<button class="layui-btn" id="searchSubmit" @click="query"><i class="layui-icon">&#xe615;</i>查 询</button>-->
+            <button class="layui-btn" @click="add" type="button"><i class="layui-icon">&#xe61f;</i> 新 增</button>
+            <button class="layui-btn layui-btn-normal" type="button" @click="update"><i class="layui-icon">&#xe642;</i>编 辑</button>
+            <button class="layui-btn layui-btn-warm" type="button" @click="del"><i class="layui-icon">&#xe642;</i>删 除</button>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+        <div id="page"></div>
+    </div>
+
+
+    <div class="panel panel-default" v-show="!showList">
+        <div class="panel-heading">联盟客户注册</div>
+        <form class="form-horizontal" style="width: 572px;">
+            <div class="form-group">
+                <div class="col-sm-4 control-label">公司名称:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.clientName" placeholder="公司名称"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">公司地址:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.clientAddr" placeholder="公司地址"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">公司电话:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.clientTel" maxlength="12" placeholder="公司电话"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">公司组织机构代码:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.clientOrgNo" maxlength="20" placeholder="公司组织机构代码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">公司营业执照附件:<span style="color: red">*</span></div>
+                <div class="col-sm-5" style="padding-right:0px;">
+                    <div class="layui-upload-drag" id="clientOrgAttach" style="display:block;padding: 12px;">
+                        <i class="layui-icon"></i>
+                        <p>点击上传，或将文件拖拽到此处</p>
+                    </div>
+                </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 100px;" id="clientOrgAttachImg" >
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">注册资金:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.regMoney" maxlength="10" placeholder="注册资金"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">开户银行信息:<span style="color: red">*</span></div>
+                <div>
+                    <div class="col-sm-2" style="padding-right: 0px;">
+                        <select id="bankName0" class="form-control" style="padding-left: 6px;">
+                            <option value=""></option>
+                            <option value="中国银行">中国银行</option>
+                            <option value="工商银行">工商银行</option>
+                            <option value="农业银行">农业银行</option>
+                            <option value="建设银行">建设银行</option>
+                            <option value="民生银行">民生银行</option>
+                            <option value="交通银行">交通银行</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4" style="padding-left: 2px; padding-right: 2px;">
+                        <input class="form-control" id="cardNum0" maxlength="19" placeholder="开户银行卡号"/>
+                    </div>
+                    <button class="layui-btn layui-btn-small" type="button" onclick="addRow();" style="margin-top:2px;"><i class="layui-icon"></i></button>
+                    <!--<button class="layui-btn layui-btn-small" type="button" style="margin-left:0px;"><i class="layui-icon"></i></button>-->
+                </div>
+            </div>
+            <div id="addInfo">
+
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">单位性质:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <label class="radio-inline">
+                        <input type="radio" name="status" value="0" v-model="q.property"/> 国有
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="status" value="1" v-model="q.property"/> 集体
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="status" value="2" v-model="q.property"/> 私营
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="status" value="3" v-model="q.property"/> 联营
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="status" value="4" v-model="q.property"/> 其他
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">法人代表姓名:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.corporateName" maxlength="15" placeholder="法人代表姓名"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">法人代表电话:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.corporateTel" maxlength="11" placeholder="法人代表电话"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">法人代表身份证号码:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.corporateId" maxlength="18" placeholder="法人代表身份证号码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">法人代表身份证附件:<span style="color: red">*</span></div>
+                <div class="col-sm-5" style="padding-right:0px;">
+                    <div class="layui-upload-drag" id="corporateIdAttach" style="display:block;padding: 12px;">
+                        <i class="layui-icon"></i>
+                        <p>点击上传，或将文件拖拽到此处</p>
+                    </div>
+                </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 100px;" id="corporateIdAttachImg" >
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">联系人姓名:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.contactName" maxlength="15" placeholder="联系人姓名"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">联系人电话:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.contactTel" maxlength="11" placeholder="联系人电话"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">联系人身份证号码:<span style="color: red">*</span></div>
+                <div class="col-sm-8">
+                    <input  class="form-control" v-model="q.contactId" maxlength="18" placeholder="联系人身份证号码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">联系人身份证附件:<span style="color: red">*</span></div>
+                <div class="col-sm-5" style="padding-right:0px;">
+                    <div class="layui-upload-drag" id="contactIdAttach" style="display:block;padding: 12px;">
+                        <i class="layui-icon"></i>
+                        <p>点击上传，或将文件拖拽到此处</p>
+                    </div>
+                 </div>
+                <div class="col-sm-3" style="padding-left: 5px;padding-right: 0px;">
+                    <img class="layui-upload-img" style="width: 125px; height: 100px;" id="contactIdAttachImg" >
+                </div>
+            </div>
+            <div class="form-group" style="margin-left: 30%;margin-top: 30px;">
+                <button id="save" class="layui-btn" type="button" @click="saveOrUpdate" >确定</button>
+                <button class="layui-btn layui-btn-warm" type="button" @click="reload" style="margin-left: 30px">返回</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<script src="${rc.contextPath}/statics/js/members/client.js?_${date.systemTime}"></script>
+</body>
+</html>

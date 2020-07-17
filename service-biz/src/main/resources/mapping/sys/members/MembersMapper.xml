@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cofco.sys.dao.members.MembersDao">
+
+    <resultMap type="com.cofco.sys.entity.members.MembersEntity" id="MembersMap">
+        <result property="id" column="ID"/>
+        <result property="isDelivery" column="ISDELIVERY"/>
+        <result property="whType" column="WHTYPE"/>
+        <result property="whName" column="WHNAME"/>
+        <result property="whAbbr" column="WHABBR"/>
+        <result property="regAddr" column="REGADDR"/>
+        <result property="officeAddr" column="OFFICEADDR"/>
+        <result property="tel" column="TEL"/>
+        <result property="orgNo" column="ORGNO"/>
+        <result property="orgAttach" column="ORGATTACH"/>
+        <result property="property" column="PROPERTY"/>
+        <result property="productType" column="PRODUCTTYPE"/>
+        <result property="productCategory" column="PRODUCTCATEGORY"/>
+        <result property="bankName" column="BANKNAME"/>
+        <result property="bankAccount" column="BANKACCOUNT"/>
+        <result property="regMoney" column="REGMONEY"/>
+        <result property="totalAsset" column="TOTALASSET"/>
+        <result property="fixedAsset" column="FIXEDASSET"/>
+        <result property="netAsset" column="NETASSET"/>
+        <result property="corporateName" column="CORPORATENAME"/>
+        <result property="corporateTel" column="CORPORATETEL"/>
+        <result property="corporateId" column="CORPORATEID"/>
+        <result property="corporateIdAttach" column="CORPORATEIDATTACH"/>
+        <result property="contactName" column="CONTACTNAME"/>
+        <result property="contactTel" column="CONTACTTEL"/>
+        <result property="contactId" column="CONTACTID"/>
+        <result property="contactIdAttach" column="CONTACTIDATTACH"/>
+        <result property="isLease" column="ISLEASE"/>
+        <result property="leaseBeginDate" column="LEASEBEGINDATE"/>
+        <result property="leaseEndDate" column="LEASEENDDATE"/>
+        <result property="regionArea" column="REGIONAREA"/>
+        <result property="houseArea" column="HOUSEAREA"/>
+        <result property="cementArea" column="CEMENTAREA"/>
+        <result property="totHeapQty" column="TOTHEAPQTY"/>
+        <result property="ftrHeapQty" column="FTRHEAPQTY"/>
+        <result property="bulkHeapQty" column="BULKHEAPQTY"/>
+        <result property="loadometerTon" column="LOADOMETERTON"/>
+        <result property="positionDiagram" column="POSITIONDIAGRAM"/>
+        <result property="upperType" column="UPPERTYPE"/>
+        <result property="upperName" column="UPPERNAME"/>
+        <result property="upperAbbr" column="UPPERABBR"/>
+        <result property="upperTel" column="UPPERTEL"/>
+        <result property="upperAddr" column="UPPERADDR"/>
+        <result property="upperOrgNo" column="UPPERORGNO"/>
+        <result property="upperOrgAttach" column="UPPERORGATTACH"/>
+        <result property="upperCorporateName" column="UPPERCORPORATENAME"/>
+        <result property="publicKey" column="PUBLICKEY"/>
+        <result property="version" column="VERSION"/>
+        <result property="time_create" column="TIME_CREATE"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="time_modify" column="TIME_MODIFY"/>
+        <result property="modifier" column="MODIFIER"/>
+        <result property="is_delete" column="IS_DELETE"/>
+        <result property="memberId" column="MEMBERID"/>
+        <result property="zmemPublicKey" column="ZMEMPUBLICKEY"/>
+        <result property="zmemPrivateKey" column="ZMEMPRIVATEKEY"/>
+        <result property="status" column="STATUS"/>
+        <result property="whtmpid" column="STATUS"/>
+    </resultMap>
+
+    <!-- SEQ_ALLIANCE_MENBER查询-->
+    <select id="seqMemberId" resultType="int">
+        select SEQ_ALLIANCE_MENBER.nextval id from sys.dual
+    </select>
+
+    <!-- SEQ_ALLIANCE_MENBER_LOG查询-->
+    <select id="seqMemberLogId" resultType="int">
+        select SEQ_ALLIANCE_MENBER_LOG.nextval id from sys.dual
+    </select>
+
+    <!--总查询-->
+    <select id="queryList" resultMap="MembersMap" resultType="com.cofco.sys.entity.members.MembersEntity">
+        select
+          ID,WHNAME,TEL,CORPORATENAME，CORPORATETEL，MEMBERID,ORGNO,STATUS
+        from <include refid="com.cofco.base.dao.JdbcUserName" />ALLIANCE_MEMBER
+          where IS_DELETE = #{is_delete} order by ID asc
+    </select>
+
+    <!--根据id号查询成员信息-->
+    <select id="queryObject" resultType="com.cofco.sys.entity.members.MembersEntity" resultMap="MembersMap">
+        select *
+          from <include refid="com.cofco.base.dao.JdbcUserName" />ALLIANCE_MEMBER
+        where ID = #{id}
+    </select>
+
+    <!--根据id号查询成员公私钥-->
+    <select id="queryKey"  resultMap="MembersMap">
+        select ID as id,WHNAME as whName,ZMEMPUBLICKEY as zmemPublicKey,ZMEMPRIVATEKEY as zmemPrivateKey
+        from ALLIANCE_MEMBER
+        where MEMBERID = #{memberId}
+    </select>
+
+    <!--分页总条数-->
+    <select id="queryTotal"  resultType="int">
+        select
+          count(*)
+        from <include refid="com.cofco.base.dao.JdbcUserName" />ALLIANCE_MEMBER
+          where IS_DELETE = #{is_delete}
+    </select>
+
+
+    <!-- 新增 -->
+    <insert id="save" parameterType="com.cofco.sys.entity.members.MembersEntity">
+        insert into<include refid="com.cofco.base.dao.JdbcUserName"/>ALLIANCE_MEMBER
+        (
+        ID,
+        ISDELIVERY,
+        WHTYPE,
+        WHNAME,
+        WHABBR,
+        REGADDR,
+        OFFICEADDR,
+        TEL,
+        ORGNO,
+        PROPERTY,
+        BANKNAME,
+        BANKACCOUNT,
+        REGMONEY,
+        TOTALASSET,
+        FIXEDASSET,
+        NETASSET,
+        CORPORATENAME,
+        CORPORATETEL,
+        CORPORATEID,
+        CONTACTNAME,
+        CONTACTTEL,
+        CONTACTID,
+        ISLEASE,
+        LEASEBEGINDATE,
+        LEASEENDDATE,
+        REGIONAREA,
+        HOUSEAREA,
+        CEMENTAREA,
+        TOTHEAPQTY,
+        FTRHEAPQTY,
+        BULKHEAPQTY,
+        LOADOMETERTON,
+        UPPERTYPE,
+        UPPERNAME,
+        UPPERABBR,
+        UPPERTEL,
+        UPPERADDR,
+        UPPERORGNO,
+        UPPERCORPORATENAME,
+        VERSION,
+        STATUS,
+        TIME_CREATE,
+        CREATOR,
+        TIME_MODIFY,
+        MODIFIER,
+        IS_DELETE,
+        ZMEMPUBLICKEY,
+        ZMEMPRIVATEKEY，
+        ORGATTACH，
+        PRODUCTTYPE,
+        PRODUCTCATEGORY,
+        CORPORATEIDATTACH,
+        CONTACTIDATTACH,
+        POSITIONDIAGRAM,
+        UPPERORGATTACH,
+        PUBLICKEY
+        )
+        values
+        (
+        #{id},
+        #{isDelivery},
+        #{whType}，
+        #{whName},
+        #{whAbbr}，
+        #{regAddr},
+        #{officeAddr}，
+        #{tel},
+        #{orgNo}，
+        #{property}，
+        #{bankName},
+        #{bankAccount}，
+        #{regMoney},
+        #{totalAsset}，
+        #{fixedAsset},
+        #{netAsset}，
+        #{corporateName},
+        #{corporateTel}，
+        #{corporateId},
+        #{contactName},
+        #{contactTel}，
+        #{contactId},
+        #{isLease},
+        #{leaseBeginDate}，
+        #{leaseEndDate},
+        #{regionArea}，
+        #{houseArea},
+        #{cementArea}，
+        #{totHeapQty},
+        #{ftrHeapQty}，
+        #{bulkHeapQty},
+        #{loadometerTon}，
+        #{upperType}，
+        #{upperName},
+        #{upperAbbr}，
+        #{upperTel},
+        #{upperAddr}，
+        #{upperOrgNo},
+        #{upperCorporateName},
+        #{version}，
+        #{status}，
+        #{time_create},
+        #{creator}，
+        #{time_modify},
+        #{modifier}，
+        #{is_delete},
+        #{zmemPublicKey}，
+        #{zmemPrivateKey}，
+        #{orgAttach},
+        #{productType},
+        #{productCategory}，
+        #{corporateIdAttach}，
+        #{contactIdAttach}，
+        #{positionDiagram},
+        #{upperOrgAttach}，
+        #{publicKey}
+        )
+    </insert>
+
+    <!-- log表新增-->
+    <insert id="saveLog" parameterType="com.cofco.sys.entity.members.AllianceMemberLogEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName" />ALLIANCE_MEMBER_LOG
+        (
+        ID,
+        ALLIANCE_MEMBER_ID,
+        TEMPID,
+        OPERATORTYPE
+        )
+        values
+        (
+        #{id},
+        #{allianceMemberId},
+        #{tempId},
+        #{operatorType}
+        )
+    </insert>
+
+    <!-- 修改-->
+    <update id="update" parameterType="com.cofco.sys.entity.members.MembersEntity">
+        UPDATE <include refid = "com.cofco.base.dao.JdbcUserName"/> ALLIANCE_MEMBER
+        <set>
+            <!--是否指定交割仓库-->
+            <if test="isDelivery!=null and isDelivery != ''">ISDELIVERY = #{isDelivery},</if>
+            <!--仓库类型-->
+            <if test="whType!=null and whType != ''">WHTYPE=#{whType},</if>
+            <!--库名称-->
+            <if test="whName!=null and whName != ''">WHNAME=#{whName},</if>
+            <!--库简称-->
+            <if test="whAbbr!=null and whAbbr != ''">WHABBR=#{whAbbr},</if>
+            <!--注册地址-->
+            <if test="regAddr!=null and regAddr != ''">REGADDR=#{regAddr},</if>
+            <!--办公地址-->
+            <if test="officeAddr!=null and officeAddr != ''">OFFICEADDR=#{officeAddr},</if>
+            <!--联系电话-->
+            <if test="tel!=null and tel != ''">TEL=#{tel},</if>
+            <!--组织机构代码-->
+            <if test="orgNo!=null and orgNo != ''">ORGNO=#{orgNo},</if>
+            <!--营业执照-->
+            <if test="orgAttach!=null and orgAttach != ''">ORGATTACH=#{orgAttach},</if>
+            <!--经营性质-->
+            <if test="property!=null and property != ''">PROPERTY=#{property},</if>
+            <!--产品类型-->
+            <if test="productType!=null and productType != ''">PRODUCTTYPE=#{productType},</if>
+            <!--产品种类-->
+            <if test="productCategory!=null and productCategory != ''">PRODUCTCATEGORY=#{productCategory},</if>
+            <!--开户银行-->
+            <if test="bankName!=null and bankName != ''">BANKNAME=#{bankName},</if>
+            <!--银行账号-->
+            <if test="bankAccount!=null and bankAccount != ''">BANKACCOUNT=#{bankAccount},</if>
+            <!--注册资金-->
+            <if test="regMoney!=null and regMoney != ''">REGMONEY=#{regMoney},</if>
+            <!--总资产-->
+            <if test="totalAsset!=null and totalAsset != ''">TOTALASSET=#{totalAsset},</if>
+            <!--固定资产-->
+            <if test="fixedAsset!=null and fixedAsset != ''">FIXEDASSET=#{fixedAsset},</if>
+            <!--净资产-->
+            <if test="netAsset!=null and netAsset != ''">NETASSET=#{netAsset},</if>
+            <!--法人代表姓名-->
+            <if test="corporateName!=null and corporateName != ''">CORPORATENAME=#{corporateName},</if>
+            <!--法人代表电话-->
+            <if test="corporateTel!=null and corporateTel != ''">CORPORATETEL=#{corporateTel},</if>
+            <!--法人代表身份证号码-->
+            <if test="corporateId!=null and corporateId != ''">CORPORATEID=#{corporateId},</if>
+            <!--法人代表身份证附件-->
+            <if test="corporateIdAttach!=null and corporateIdAttach != ''">CORPORATEIDATTACH=#{corporateIdAttach},</if>
+            <!--联系人姓名-->
+            <if test="contactName!=null and contactName != ''">CONTACTNAME=#{contactName},</if>
+            <!--联系人电话-->
+            <if test="contactTel!=null and contactTel != ''">CONTACTTEL=#{contactTel},</if>
+            <!--联系人身份证号码-->
+            <if test="contactId!=null and contactId != ''">CONTACTID=#{contactId},</if>
+            <!--联系人身份证附件-->
+            <if test="contactIdAttach!=null and contactIdAttach != ''">CONTACTIDATTACH=#{contactIdAttach},</if>
+            <!--是否为租赁库-->
+            <if test="isLease!=null and isLease != ''">ISLEASE=#{isLease},</if>
+            <!--租赁起始日期-->
+            <if test="leaseBeginDate!=null and leaseBeginDate != ''">LEASEBEGINDATE=#{leaseBeginDate},</if>
+            <!--租赁终止日期-->
+            <if test="leaseEndDate!=null and leaseEndDate != ''">LEASEENDDATE=#{leaseEndDate},</if>
+            <!--库区面积-->
+            <if test="regionArea!=null and regionArea != ''">REGIONAREA=#{regionArea},</if>
+            <!--库房面积-->
+            <if test="houseArea!=null and houseArea != ''">HOUSEAREA=#{houseArea},</if>
+            <!--水泥硬化地面面积-->
+            <if test="cementArea!=null and cementArea != ''">CEMENTAREA=#{cementArea},</if>
+            <!--总堆储能力-->
+            <if test="totHeapQty!=null and totHeapQty != ''">TOTHEAPQTY=#{totHeapQty},</if>
+            <!--期货堆储能力-->
+            <if test="ftrHeapQty!=null and ftrHeapQty != ''">FTRHEAPQTY=#{ftrHeapQty},</if>
+            <!--散粮堆储能力-->
+            <if test="bulkHeapQty!=null and bulkHeapQty != ''">BULKHEAPQTY=#{bulkHeapQty},</if>
+            <!--地磅吨数-->
+            <if test="loadometerTon!=null and loadometerTon != ''">LOADOMETERTON=#{loadometerTon},</if>
+            <!--库平面图-->
+            <if test="positionDiagram!=null and positionDiagram != ''">POSITIONDIAGRAM=#{positionDiagram},</if>
+            <!--上级仓库类型-->
+            <if test="upperType!=null and upperType != ''">UPPERTYPE=#{upperType},</if>
+            <!--上级仓库名称-->
+            <if test="upperName!=null and upperName != ''">UPPERNAME=#{upperName},</if>
+            <!--上级仓库简称-->
+            <if test="upperAbbr!=null and upperAbbr != ''">UPPERABBR=#{upperAbbr},</if>
+            <!--上级仓库联系电话-->
+            <if test="upperTel!=null and upperTel != ''">UPPERTEL=#{upperTel},</if>
+            <!--上级仓库地址-->
+            <if test="upperAddr!=null and upperAddr != ''">UPPERADDR=#{upperAddr},</if>
+            <!--上级仓库组织机构代码-->
+            <if test="upperOrgNo!=null and upperOrgNo != ''">UPPERORGNO=#{upperOrgNo},</if>
+            <!--上级仓库营业执照-->
+            <if test="upperOrgAttach!=null and upperOrgAttach != ''">UPPERORGATTACH=#{upperOrgAttach},</if>
+            <!--上级仓库法人代表姓名-->
+            <if test="upperCorporateName!=null and upperCorporateName != ''">UPPERCORPORATENAME=#{upperCorporateName},</if>
+            <!--联盟成员公钥-->
+            <if test="publicKey!=null and publicKey != ''">PUBLICKEY=#{publicKey},</if>
+            <!--版本-->
+            <if test="version!=null and version != ''">VERSION=#{version},</if>
+            <!--状态-->
+            <if test="status!=null and status != ''">STATUS=#{status},</if>
+            <!--临时id-->
+            <if test="whtmpid!=null and whtmpid != ''">STATUS=#{whtmpid},</if>
+            <!--修改时间-->
+            <if test="time_modify!=null and time_modify != ''">TIME_MODIFY=#{time_modify},</if>
+            <!--修改人-->
+            <if test="modifier!=null and modifier != ''">MODIFIER=#{modifier}</if>
+        </set>
+        where ID=#{id}
+    </update>
+
+    <!-- 大商所提供的公钥更新入库-->
+    <update id="updateRevert" parameterType="com.cofco.sys.entity.members.MembersEntity">
+        UPDATE<include refid="com.cofco.base.dao.JdbcUserName"/>ALLIANCE_MEMBER
+        <set>
+            <if test="time_modify!=null and time_modify != ''">TIME_MODIFY=#{time_modify},</if>
+            <if test="modifier!=null and modifier != ''">MODIFIER=#{modifier},</if>
+            <if test="publicKey!=null and publicKey != ''">PUBLICKEY=#{publicKey}</if>
+        </set>
+        where
+          ID=#{id}
+    </update>
+
+    <!-- 将联盟成员ID，status，is_delete更新入库-->
+    <update id="updateMemberId" parameterType="Map">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>ALLIANCE_MEMBER
+          <set>
+            <if test="memberId!=null and memberId != ''">MEMBERID=#{memberId},</if>
+            <if test="status!=null and status != ''">STATUS=#{status},</if>
+            <if test="is_delete!=null and is_delete != ''">IS_DELETE=#{is_delete}</if>
+          </set>
+        where id =
+          (select ALLIANCE_MEMBER_ID
+            from <include refid="com.cofco.base.dao.JdbcUserName"/>Alliance_Member_Log
+          WHERE TEMPID = #{whTmpId})
+    </update>
+
+    <!-- 修改日志表审核状态值-->
+    <update id="updateLog" parameterType="com.cofco.sys.entity.members.AllianceMemberLogEntity">
+        UPDATE<include refid="com.cofco.base.dao.JdbcUserName"/>ALLIANCE_MEMBER_LOG
+        set
+            AUDITSTATUS=#{auditStatus}
+        where
+        TEMPID=#{tempId}
+    </update>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.util.List">
+        update
+        <include refid="com.cofco.base.dao.JdbcUserName"/>
+        ALLIANCE_MEMBER
+        <set>
+            <if test="status!=null and status != ''">STATUS=#{status},</if>
+            <if test="is_delete!=null and is_delete != ''">IS_DELETE=#{is_delete}</if>
+        </set>
+        where
+          ID = #{id}
+    </update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

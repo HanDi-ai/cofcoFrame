@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.members.BillDao">
+
+    <resultMap type="com.cofco.sys.entity.members.BillEntity" id="BillMap">
+        <id property="id" column="ID"></id>
+        <result property="whMemberId" column="WHMEMBERID" />
+        <result property="wbillType" column="WBILLTYPE"/>
+        <result property="isStandard" column="ISSTANDARD"/>
+        <result property="whWbillId" column="WHWBILLID"/>
+        <result property="varietyId" column="VARIETYID"/>
+        <result property="varietyName" column="VARIETYNAME"/>
+        <result property="packageType" column="PACKAGETYPE"/>
+        <result property="counts" column="COUNTS"/>
+        <result property="weight" column="WEIGHT"/>
+        <result property="isMarked" column="ISMARKED"/>
+        <result property="markContent" column="MARKCONTENT"/>
+        <result property="productArea" column="PRODUCTAREA"/>
+        <result property="quality" column="QUALITY"/>
+        <result property="isInspected" column="ISINSPECTED"/>
+        <result property="inspectionOrgName" column="INSPECTIONORGNAME"/>
+        <result property="inspectionOrgNo" column="INSPECTIONORGNO"/>
+        <result property="inspectionAttach" column="INSPECTIONATTACH"/>
+        <result property="inspectedBeginDate" column="INSPECTEDBEGINDATE"/>
+        <result property="inspectedEndDate" column="INSPECTEDENDDATE"/>
+        <result property="locationInfo" column="LOCATIONINFO"/>
+        <result property="storeBeginDate" column="STOREBEGINDATE"/>
+        <result property="storeEndDate" column="STOREENDDATE"/>
+        <result property="storageFee" column="STORAGEFEE"/>
+        <result property="lossStandard" column="LOSSSTANDARD"/>
+        <result property="operatorName" column="OPERATORNAME"/>
+        <result property="operatorTel" column="OPERATORTEL"/>
+        <result property="clientId" column="CLIENTID"/>
+        <result property="clientContactName" column="CLIENTCONTACTNAME"/>
+        <result property="clientContactTel" column="CLIENTCONTACTTEL"/>
+        <result property="isInsurance" column="ISINSURANCE"/>
+        <result property="insuranceOrg" column="INSURANCEORG"/>
+        <result property="insuranceOrgNo" column="INSURANCEORGNO"/>
+        <result property="insuranceContact" column="INSURANCECONTACT"/>
+        <result property="insuranceContactTel" column="INSURANCECONTACTTEL"/>
+        <result property="insuranceBeginDate" column="INSURANCEBEGINDATE"/>
+        <result property="insuranceEndDate" column="INSURANCEENDDATE"/>
+        <result property="version" column="VERSION"/>
+        <result property="time_Create" column="TIME_CREATE"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="time_Modify" column="TIME_MODIFY"/>
+        <result property="modifier" column="MODIFIER"/>
+        <result property="is_Delete" column="IS_DELETE"/>
+        <result property="wbillId" column="WBILLID"/>
+    </resultMap>
+
+    <resultMap type="com.cofco.sys.entity.members.BillIotEntity" id="BillIotMap">
+        <id property="id" column="ID"></id>
+        <result property="deviceType" column="DEVICETYPE" />
+        <result property="locationId" column="LOCATIONID" />
+        <result property="sn" column="SN" />
+        <result property="scode" column="SCODE" />
+        <result property="iotValue" column="IOTVALUE" />
+        <result property="createTime" column="CREATETIME" />
+        <result property="createUser" column="CREATEUSER" />
+        <result property="updateTime" column="UPDATETIME" />
+        <result property="updateUser" column="UPDATEUSER" />
+    </resultMap>
+
+    <!-- SEQ_BILL查询-->
+    <select id="seqBillId" resultType="int">
+        select SEQ_BILL.nextval id from sys.dual
+    </select>
+
+    <!-- SEQ_BILL_LOG查询-->
+    <select id="seqBillLogId" resultType="int">
+        select SEQ_BILL_LOG.nextval id from sys.dual
+    </select>
+
+    <!-- SEQ_BILL_OPERATOR查询-->
+    <select id="seqBillOperatorId" resultType="int">
+        select SEQ_BILL_OPERATOR.nextval id from sys.dual
+    </select>
+
+    <!-- SEQ_BILL_OPERATOR_LOG查询-->
+    <select id="seqBillOperatorlogId" resultType="int">
+        select SEQ_BILL_OPERATOR_LOG.nextval id from sys.dual
+    </select>
+
+    <!-- SEQ_BILL_IOT查询-->
+    <select id="seqBillIot" resultType="int">
+        select SEQ_BILL_IOT.nextval id from sys.dual
+    </select>
+
+    <!--仓单备案信息查询 -->
+    <!--<select id="queryList" resultMap="BillMap">
+        select VIEWID ID,VARIETYID,VARIETYNAME,CLIENTCONTACTNAME,CLIENTCONTACTTEL
+            from IDGMISUSER.V_DS
+        WHERE CLIENTCONTACTTEL=#{id}
+        <if test="varietyName != null and varietyName.trim() != ''" >
+            AND VARIETYNAME=#{varietyName}
+        </if>
+    </select>-->
+
+    <select id="queryList" parameterType="String" resultMap="BillMap">
+        select VARIETYID,VARIETYNAME,PACKAGETYPE,COUNTS,WEIGHT,LOCATION_ID,CUTOMERID clientId,WHWBILLID,ID markContent
+        from VIEW_W_BILL
+        WHERE VARIETYID = #{varietyId}
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select
+        count (*)
+        from VIEW_W_BILL
+        where VARIETYID='1073611'
+    </select>
+
+
+    <!--根据id号查询仓单信息-->
+    <select id="queryObject" parameterType="String" resultMap="BillMap">
+        select VARIETYID,VARIETYNAME,PACKAGETYPE,COUNTS,WEIGHT
+          from VIEW_W_BILL
+        where ID = #{id}
+    </select>
+
+    <!--锁货通过后，查询operator表的信息-->
+    <select id="queryPreFreezing" resultType="com.cofco.sys.entity.members.BillOperatorEntity">
+      select ID,PLEDGERMEMBERID,MEMBERTYPE,CLIENTID,OPERATORNAME,OPERATORTEL,OPERATORID
+          from <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_OPERATOR
+      where ID = #{id} and IS_DELETE = '0'
+    </select>
+
+    <!-- 查询flow表中的 仓单id+仓单重量-->
+    <select id="queryFlow" resultType="com.cofco.sys.entity.members.BillFlowEntity">
+      select WBILLID,WEIGHT
+        from <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_FLOW
+      where BILL_OPERATOR_ID = #{billOperatorId} AND IS_DELETE = '0' order by ID asc
+    </select>
+
+    <!-- 总条数查询-->
+    <!--<select id="queryTotal" resultType="int">
+        select
+            count (*)
+        from IDGMISUSER.V_DS
+            where CLIENTCONTACTTEL='15611460628'
+        <if test="varietyName != null and varietyName.trim() != ''" >
+            AND VARIETYNAME=#{varietyName}
+        </if>
+    </select>-->
+
+    <!-- 根据仓单id查询需传给大商所物联网接口的仓单基础信息-->
+    <select id="queryIot"  resultMap="BillMap">
+      select ID,WHMEMBERID,CLIENTID,WBILLID,LOCATIONINFO
+      from <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL
+        where WBILLID = #{wbillId}
+    </select>
+
+    <!--W_BILL_IOT表数据查询-->
+    <select id="queryIotInfo"  resultMap="BillIotMap">
+        select *
+        FROM <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_IOT
+          where SCODE = #{scode} and DEVICETYPE = #{deviceType}
+    </select>
+
+    <!-- W_BILL_OPERATOR_LOG表中查询临时ID-->
+    <select id="queryPrefreezeId" resultType="String">
+      select TEMPID
+      from <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_OPERATOR_LOG
+      where ID = #{id}
+    </select>
+
+    <!--仓单备案提交 -->
+    <insert id="save" parameterType="com.cofco.sys.entity.members.BillEntity">
+      INSERT INTO <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL
+        (
+        ID,
+        WHMEMBERID,
+        WBILLTYPE,
+        ISSTANDARD,
+        WHWBILLID,
+        VARIETYID,
+        VARIETYNAME,
+        PACKAGETYPE,
+        COUNTS,
+        WEIGHT,
+        ISMARKED,
+        MARKCONTENT,
+        PRODUCTAREA,
+        QUALITY,
+        ISINSPECTED,
+        INSPECTIONORGNAME,
+        INSPECTIONORGNO,
+        INSPECTIONATTACH,
+        INSPECTEDBEGINDATE,
+        INSPECTEDENDDATE,
+        LOCATIONINFO,
+        STOREBEGINDATE,
+        STOREENDDATE,
+        STORAGEFEE,
+        LOSSSTANDARD,
+        OPERATORNAME,
+        OPERATORTEL,
+        CLIENTID,
+        CLIENTCONTACTNAME,
+        CLIENTCONTACTTEL,
+        ISINSURANCE,
+        INSURANCEORG,
+        INSURANCEORGNO,
+        INSURANCECONTACT,
+        INSURANCECONTACTTEL,
+        INSURANCEBEGINDATE,
+        INSURANCEENDDATE,
+        VERSION,
+        TIME_CREATE,
+        CREATOR,
+        IS_DELETE
+        )
+        values
+        (
+        #{id},
+        #{whMemberId},
+        #{wbillType},
+        #{isStandard},
+        #{whWbillId},
+        #{varietyId},
+        #{varietyName},
+        #{packageType},
+        #{counts},
+        #{weight},
+        #{isMarked},
+        #{markContent},
+        #{productArea},
+        #{quality},
+        #{isInspected},
+        #{inspectionOrgName},
+        #{inspectionOrgNo},
+        #{inspectionAttach},
+        #{inspectedBeginDate},
+        #{inspectedEndDate},
+        #{locationInfo},
+        #{storeBeginDate},
+        #{storeEndDate},
+        #{storageFee},
+        #{lossStandard},
+        #{operatorName},
+        #{operatorTel},
+        #{clientId},
+        #{clientContactName},
+        #{clientContactTel},
+        #{isInsurance},
+        #{insuranceOrg},
+        #{insuranceOrgNo},
+        #{insuranceContact},
+        #{insuranceContactTel},
+        #{insuranceBeginDate},
+        #{insuranceEndDate},
+        #{version},
+        #{time_Create},
+        #{creator},
+        #{is_Delete}
+        )
+    </insert>
+
+    <!--仓单质押预冻结提交 -->
+    <insert id="preFreezing" parameterType="com.cofco.sys.entity.members.BillOperatorEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_OPERATOR
+        (
+        ID,
+        OPERATORTYPE,
+        PLEDGERMEMBERID,
+        MEMBERTYPE,
+        CLIENTID,
+        PLEDGERCONTRACTID,
+        OPERATORNAME,
+        OPERATORTEL,
+        OPERATORID,
+        VERSION,
+        IS_DELETE
+        )
+        values
+        (
+        #{id},
+        #{operatorType},
+        #{pledgerMemberId},
+        #{memberType},
+        #{clientId},
+        #{pledgerContractId},
+        #{operatorName},
+        #{operatorTel},
+        #{operatorId},
+        #{version},
+        #{isDelete}
+        )
+    </insert>
+
+    <insert id="preFreezingFlow" parameterType="com.cofco.sys.entity.members.BillFlowEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_FLOW
+        (
+        ID,
+        BILL_OPERATOR_ID,
+        CLIENTID,
+        WBILLID,
+        WBILLSTATUS,
+        TIME_CREATE,
+        WEIGHT,
+        IS_DELETE
+        )
+        VALUES
+        (
+        #{id},
+        #{billOperatorId},
+        #{clientId},
+        #{wbillId},
+        #{wbillStatus},
+        #{timeCreate},
+        #{weight},
+        #{isDelete}
+        )
+    </insert>
+
+    <!-- W_BILL_LOG表新增仓单备案信息-->
+    <insert id="saveOnrecordLog" parameterType="com.cofco.sys.entity.members.BillLogEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_LOG
+        (
+        ID,
+        W_BILL_ID,
+        TEMPID,
+        OPERATORTYPE,
+        AUDITSTATUS
+        )
+        values
+        (
+        #{id},
+        #{wbillId},
+        #{tempId},
+        #{operatorType},
+        #{auditStatus}
+        )
+    </insert>
+
+    <!-- W_BILL_OPERATOR_LOG表新增操作信息-->
+    <insert id="saveOperation" parameterType="com.cofco.sys.entity.members.BillOperatorLogEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_OPERATOR_LOG
+        (
+        ID,
+        W_BILL_OPERATOR_ID,
+        TEMPID,
+        OPERATORTYPE,
+        AUDITSTATUS
+        )
+        values
+        (
+        #{id},
+        #{wbillOperatorId},
+        #{tempId},
+        #{operatorType},
+        #{auditStatus}
+        )
+    </insert>
+
+    <!--iot数据入库-->
+    <insert id="saveIot" parameterType="com.cofco.sys.entity.members.BillIotEntity">
+      INSERT INTO <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_IOT
+        (
+          ID,
+          DEVICETYPE,
+          LOCATIONID,
+          SN,
+          SCODE,
+          IOTVALUE
+        )
+        values
+        (
+          #{id},
+          #{deviceType},
+          #{locationId},
+          #{sn},
+          #{scode},
+          #{iotValue}
+        )
+    </insert>
+
+    <!-- 将联盟仓单ID更新入库-->
+    <update id="updateWbillId" parameterType="Map">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL
+        set WBILLID = #{wbillId}
+        where ID =
+        (select W_BILL_ID
+        from <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_LOG
+        WHERE TEMPID = #{wbillTmpId})
+    </update>
+
+    <!-- 修改W_BILL_LOG表状态值-->
+    <update id="updateLog" parameterType="com.cofco.sys.entity.members.BillLogEntity">
+        UPDATE<include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_LOG
+        set
+        AUDITSTATUS=#{auditStatus}
+        where
+        TEMPID=#{tempId}
+    </update>
+
+    <!-- 修改操作类型表数据-->
+    <update id="update" parameterType="com.cofco.sys.entity.members.BillOperatorEntity">
+      update <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_OPERATOR
+        <set>
+            <if test="operatorType!=null">OPERATORTYPE=#{operatorType},</if>
+            <if test="pledgerMemberId!=null">PLEDGERMEMBERID=#{pledgerMemberId},</if>
+            <if test="memberType!=null">MEMBERTYPE=#{memberType},</if>
+            <if test="clientId!=null">CLIENTID=#{clientId},</if>
+            <if test="operatorName!=null">OPERATORNAME=#{operatorName},</if>
+            <if test="operatorTel!=null">OPERATORTEL=#{operatorTel},</if>
+            <if test="operatorId!=null">OPERATORID=#{operatorId},</if>
+            <if test="version!=null">VERSION=#{version},</if>
+            <if test="isDelete!=null">IS_DELETE=#{isDelete}</if>
+        </set>
+        where ID=#{id}
+    </update>
+
+
+    <!-- 将虚拟仓单ID更新入库及修改操作类型-->
+    <!--<update id="updateVir" parameterType="Map">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR
+        <set>
+            <if test="virtualWbillId!=null">VIRTUALWBILLID = #{virtualWbillId},</if>
+            <if test="operatorType!=null">OPERATORTYPE = #{operatorType}</if>
+        </set>
+        where ID =
+        (select W_BILL_OPERATOR_ID
+        from <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR_LOG
+        WHERE TEMPID = #{tempId})
+    </update>-->
+    <update id="updateVir" parameterType="Map">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR
+        <set>
+            <if test="virtualWbillId!=null and virtualWbillId != ''">VIRTUALWBILLID=#{virtualWbillId},</if>
+            <if test="operatorType!=null and operatorType != ''">OPERATORTYPE=#{operatorType}</if>
+        </set>
+        where ID =
+        (select W_BILL_OPERATOR_ID
+        from <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR_LOG
+        WHERE TEMPID = #{tempId})
+    </update>
+
+    <!-- 修改W_BILL_OPERATOR_LOG表状态值-->
+    <update id="updateOperatorLog" parameterType="com.cofco.sys.entity.members.BillOperatorLogEntity">
+        UPDATE<include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR_LOG
+        set
+        AUDITSTATUS=#{auditStatus}
+        where
+        TEMPID=#{tempId}
+    </update>
+
+    <!-- 修改W_BILL_OPERATOR_LOG表类型值-->
+    <update id="updateOperatorType" parameterType="com.cofco.sys.entity.members.BillOperatorLogEntity">
+        UPDATE<include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR_LOG
+        set
+        OPERATORTYPE=#{operatorType}
+        where
+        W_BILL_OPERATOR_ID=#{wbillOperatorId}
+    </update>
+
+    <!--删除W_BILL_FLOW表数值-->
+    <update id="delFlow" parameterType="com.cofco.sys.entity.members.BillFlowEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_FLOW
+        set
+        IS_DELETE = #{isDelete}
+        where
+        BILL_OPERATOR_ID = #{billOperatorId}
+    </update>
+
+    <!--删除W_BILL_FLOW表数值,当预冻结被驳回时-->
+    <update id="preFreedelFlow" parameterType="com.cofco.sys.entity.members.BillFlowEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_FLOW
+        set
+          IS_DELETE = #{isDelete}
+        where
+          BILL_OPERATOR_ID =
+            (select W_BILL_OPERATOR_ID
+              from <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR_LOG
+            WHERE TEMPID = #{billOperatorId})
+    </update>
+
+
+    <!--仓单质押预冻结撤销提交 -->
+    <!--<update id="delete" parameterType="com.cofco.sys.entity.members.BillOperatorEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_OPERATOR
+        set
+        IS_DELETE = #{is_delete}
+        where
+        PREFREEZEID = #{prefreezeid}
+    </update>-->
+
+    <update id="delete" parameterType="Map">
+        update <include refid="com.cofco.base.dao.JdbcUserName" />W_BILL_OPERATOR
+        <set>
+            <if test="is_delete!=null and is_delete != ''">IS_DELETE=#{is_delete},</if>
+            <if test="virtualWbillId!=null and virtualWbillId != ''">VIRTUALWBILLID=#{virtualWbillId},</if>
+            <if test="operatorType!=null and operatorType != ''">OPERATORTYPE=#{operatorType}</if>
+        </set>
+        where ID =
+        (select W_BILL_OPERATOR_ID
+        from <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR_LOG
+        WHERE TEMPID = #{tempId})
+    </update>
+
+</mapper>

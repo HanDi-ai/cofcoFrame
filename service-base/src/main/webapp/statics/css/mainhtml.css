@@ -1,0 +1,12 @@
+.maindivOutside {background-color: #FFFFFF;width: 150px;height: 120px;border-radius: 8px 8px 8px 8px;box-shadow: 0px 4px 0px  0px #F0F0F0;border:1px solid #eeeeee;margin-top: 4%;z-index:998;}
+.maindivMiddle {width: 150px;height: 35px;background-color:#009688;border-radius: 8px 8px 0px 0px;color: #FFFFFF;font-size:18px;position:relative;z-index:999;white-space: nowrap;overflow: hidden}
+.maindivTitle {position: absolute;top: 50%;transform: translateY(-50%);text-align:center;width: 130px;overflow: hidden;text-overflow: ellipsis;left: 5%;}
+.maindivcontent {margin-top: 7%;text-align:center;}
+.grouptitle {box-shadow: 0px 4px 0px  0px #F0F0F0; position:relative;border-radius: 8px 8px 8px 8px;}
+.grouptitlemix {background-color: #FF5722;color: #FFFFFF;font-size:18px;height: 30px;border-radius: 8px 8px 0px 0px;}
+.spantitle{margin-left: 3%}
+.lendChoice{height:60px}
+.lendChoicetop{margin-top:80%}
+.input_i{font-size: 20px; color: #009688;}
+.agengduo{color: #FFFFFF;margin-left: 70%}
+.agengduo5{color: #FFFFFF;margin-left: 78%}

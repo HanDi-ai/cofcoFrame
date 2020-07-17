@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.organ.LendDao">
+
+
+	<resultMap type="com.cofco.sys.entity.user.UserEntity" id="userMap">
+		<result property="id" column="id"/>
+		<result property="bapid" column="bapid"/>
+		<result property="baid" column="baid"/>
+		<result property="userName" column="user_name"/>
+		<result property="loginName" column="login_name"/>
+		<result property="passWord" column="pass_word"/>
+		<result property="createTime" column="create_time"/>
+		<result property="updateTime" column="update_time"/>
+		<result property="status" column="status"/>
+		<result property="salt" column="salt"/>
+		<result property="phone" column="phone"/>
+		<result property="photo" column="photo"/>
+		<result property="email" column="email"/>
+		<result property="createId" column="create_id"/>
+		<result property="updateId" column="update_id"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+
+	<sql id="Base_Column_List" >
+		s.id,
+		s.bapid,
+		s.baid,
+		s.user_name,
+		s.login_name,
+		s.pass_word,
+		s.create_time,
+		s.update_time,
+		s.status,
+		s.salt,
+		s.phone,
+		s.photo,
+		s.email,
+		s.create_id,
+		s.update_id,
+		s.remark
+    </sql>
+
+	<resultMap type="com.cofco.sys.entity.organ.LendEntity" id="lendMap">
+		<result property="id" column="id"/>
+		<result property="user_Id" column="user_id"/>
+		<result property="old_organ_Id" column="old_organ_id"/>
+		<result property="new_organ_Id" column="new_organ_id"/>
+		<result property="lend_time" column="lend_time"/>
+		<result property="status" column="status"/>
+		<result property="create_time" column="create_time"/>
+		<result property="create_id" column="create_id"/>
+	</resultMap>
+
+	<sql id="Base_Column_Lend_List" >
+		id,
+		user_id,
+		old_organ_id,
+		new_organ_id,
+		lend_time,
+		status,
+		create_time,
+		create_id
+    </sql>
+
+	<!--根据组织机构ID查询人员-->
+	<select id="queryList" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+
+		select
+		<include refid="Base_Column_List" />,(SELECT simplify_name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=s.baid) AS baName,
+		(SELECT simplify_name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=s.bapid ) AS bapName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user s
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o on o.id=s.bapid
+		WHERE 1=1
+		AND  o.id=#{old_organ_Id}
+		<if test="userName != null and userName.trim() != ''" >
+			AND user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by s.id desc
+			</otherwise>
+		</choose>
+
+
+	</select>
+	<!--根据组织机构ID查询人员total-->
+	<select id="queryTotal" resultType="int">
+		select
+		count(*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user s
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o on o.id=s.bapid
+		WHERE 1=1
+		AND  o.id=#{old_organ_Id}
+		<if test="userName != null and userName.trim() != ''" >
+			AND user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by s.id desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--根据组织机构ID查询借调人员-->
+	<select id="newList" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+		select
+		<include refid="Base_Column_List" />,(SELECT simplify_name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=s.baid) AS baName,
+		(SELECT simplify_name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=s.bapid ) AS bapName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user s
+		WHERE 1=1
+		AND s.id  in (select USER_ID from <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_LEND where new_organ_Id=#{new_organ_Id} AND status=0)
+		<if test="userName != null and userName.trim() != ''" >
+			AND user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by s.id desc
+			</otherwise>
+		</choose>
+
+	</select>
+	<!--根据组织机构ID查询借调人员total-->
+	<select id="newTotal" resultType="int">
+		select
+		count(*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user s
+		WHERE 1=1
+		AND s.id  in (select USER_ID from <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_LEND where new_organ_Id=#{new_organ_Id} AND status=0)
+		<if test="userName != null and userName.trim() != ''" >
+			AND user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by s.id desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--借调操作-->
+	<insert id="save"   parameterType="java.util.Map">
+		insert into <include refid="com.cofco.base.dao.JdbcUserName"/>sys_lend
+		(
+			id,
+			user_id,
+			old_organ_id,
+			new_organ_id,
+			lend_time,
+			status,
+			create_time,
+			create_id
+		)
+		values
+		(
+			#{id,jdbcType=VARCHAR},
+			#{user_id,jdbcType=VARCHAR},
+			#{old_organ_Id,jdbcType=VARCHAR},
+			#{new_organ_Id,jdbcType=VARCHAR},
+			#{lend_time,jdbcType=VARCHAR},
+			#{status,jdbcType=VARCHAR},
+			#{create_time,jdbcType=VARCHAR},
+			#{create_id,jdbcType=VARCHAR}
+		)
+	</insert>
+	<!--取消借调-->
+	<update id="relieve"  parameterType="com.cofco.sys.entity.organ.LendEntity">
+		begin
+		<foreach collection="userIdList" item="item" index="index" separator=";" >
+			update
+			<include refid="com.cofco.base.dao.JdbcUserName"/>sys_lend
+			set
+			status =#{status}
+			where user_id = #{item}
+			AND new_organ_Id=#{new_organ_Id}
+		</foreach>
+		;end;
+	</update>
+
+
+</mapper>

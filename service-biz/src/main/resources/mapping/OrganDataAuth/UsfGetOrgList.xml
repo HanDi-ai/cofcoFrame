@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.base.dao">
+    <!-- 获取当前登陆者组织机构数据权限公共控制类 调用USF_GET_ORG_LIST函数 获取权限 -->
+    <sql  id="UsfGetOrgList" >
+      AND   ID IN(
+                  SELECT ORG_ID As ID FROM TABLE(<include refid="com.cofco.base.dao.JdbcUserName"/>PKG_UTIL.USF_GET_ORG_LIST('${userid}','')) WHERE ORG_ID != '0'
+                 )
+    </sql>
+</mapper>

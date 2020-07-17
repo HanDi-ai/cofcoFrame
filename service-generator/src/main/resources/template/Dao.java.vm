@@ -1,0 +1,17 @@
+package ${package}.dao.common;
+
+import ${package}.entity.common.${className}Entity;
+import ${baseDao}.BaseDao;
+import org.springframework.stereotype.Repository;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@Repository
+public interface ${className}Dao extends BaseDao<${className}Entity> {
+	
+}

@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.members.FreezeDao">
+
+    <resultMap type="com.cofco.sys.entity.members.BillEntity" id="billMap">
+        <result property="id" column="id"/>
+        <result property="wbillId" column="wbillId"/>
+        <result property="whMemberId" column="whMemberId"/>
+        <result property="wbillType" column="wbillType"/>
+        <result property="isStandard" column="isStandard"/>
+        <result property="whWbillId" column="whWbillId"/>
+        <result property="varietyId" column="varietyId"/>
+        <result property="varietyName" column="varietyName"/>
+        <result property="packageType" column="packageType"/>
+        <result property="counts" column="counts"/>
+        <result property="weight" column="weight"/>
+        <result property="weightChk" column="weight"/>
+        <result property="isMarked" column="isMarked"/>
+        <result property="markContent" column="markContent"/>
+        <result property="productArea" column="productArea"/>
+        <result property="quality" column="quality"/>
+        <result property="isInspected" column="isInspected"/>
+        <result property="inspectionOrgName" column="inspectionOrgName"/>
+        <result property="inspectionOrgNo" column="inspectionOrgNo"/>
+        <result property="inspectionAttach" column="inspectionAttach"/>
+        <result property="inspectedBeginDate" column="inspectedBeginDate"/>
+        <result property="inspectedEndDate" column="inspectedEndDate"/>
+        <result property="locationInfo" column="locationInfo"/>
+        <result property="storeBeginDate" column="storeBeginDate"/>
+        <result property="storeEndDate" column="storeEndDate"/>
+        <result property="storageFee" column="storageFee"/>
+        <result property="lossStandard" column="lossStandard"/>
+        <result property="operatorName" column="operatorName"/>
+        <result property="operatorTel" column="operatorTel"/>
+        <result property="clientId" column="clientId"/>
+        <result property="clientContactName" column="clientContactName"/>
+        <result property="clientContactTel" column="clientContactTel"/>
+        <result property="isInsurance" column="isInsurance"/>
+        <result property="insuranceOrg" column="insuranceOrg"/>
+        <result property="insuranceOrgNo" column="insuranceOrgNo"/>
+        <result property="insuranceContact" column="insuranceContact"/>
+        <result property="insuranceContactTel" column="insuranceContactTel"/>
+        <result property="insuranceBeginDate" column="insuranceBeginDate"/>
+        <result property="insuranceEndDate" column="insuranceEndDate"/>
+        <result property="version" column="version"/>
+        <result property="timeCreate" column="timeCreate"/>
+        <result property="creator" column="creator"/>
+        <result property="timeModify" column="timeModify"/>
+        <result property="modifier" column="modifier"/>
+        <result property="is_Delete" column="isDelete"/>
+        <!--<result property="operatorType" column="operatorType"/>-->
+    <!--<result property="pledgedWeight" column="pledgedWeight"/>-->
+    </resultMap>
+
+    <resultMap type="com.cofco.sys.entity.members.BillPledgeEntity" id="pledgeMap">
+        <result property="id" column="id"/>
+        <result property="operatorType" column="operatorType"/>
+        <result property="operatorTypeCode" column="operatorType"/>
+        <result property="virtualWbillId" column="virtualWbillId"/>
+        <result property="pledgerMemberId" column="pledgerMemberId"/>
+        <result property="memberType" column="memberType"/>
+        <result property="clientId" column="clientId"/>
+        <result property="pledgerContractId" column="pledgerContractId"/>
+        <result property="operatorName" column="operatorName"/>
+        <result property="operatorTel" column="operatorTel"/>
+        <result property="operatorId" column="operatorId"/>
+        <result property="operatorIdAttach" column="operatorIdAttach"/>
+        <result property="pledgeContractAttach" column="pledgeContractAttach"/>
+        <result property="pledgeBeginDate" column="pledgeBeginDate"/>
+        <result property="pledgeEndDate" column="pledgeEndDate"/>
+        <result property="version" column="version"/>
+        <result property="isDelete" column="is_Delete"/>
+        <result property="billOperatorId" column="bill_operator_id"/>
+        <result property="timeCreate" column="time_create"/>
+        <result property="weight" column="weight"/>
+        <result property="virtualWbillId" column="virtualWbillId"/>
+    </resultMap>
+
+    <select id="queryListInfo" resultType="com.cofco.sys.entity.members.BillEntity" resultMap="billMap">
+        select t.id,
+               t.wbillId,
+               t.whMemberId,
+               t.wbillType,
+               t.isStandard,
+               t.whWbillId,
+               t.varietyId,
+               t.varietyName,
+               t.packageType,
+               t.counts,
+               nvl(t.weight - e.pledgedWeight,t.weight) as weight,
+               t.isMarked,
+               t.markContent,
+               t.productArea,
+               t.quality,
+               t.isInspected,
+               t.inspectionOrgName,
+               t.inspectionOrgNo,
+               t.inspectionAttach,
+               t.inspectedBeginDate,
+               t.inspectedEndDate,
+               t.locationInfo,
+               t.storeBeginDate,
+               t.storeEndDate,
+               t.storageFee,
+               t.lossStandard,
+               t.operatorName,
+               t.operatorTel,
+               t.clientId,
+               t.clientContactName,
+               t.clientContactTel,
+               t.isInsurance,
+               t.insuranceOrg,
+               t.insuranceOrgNo,
+               t.insuranceContact,
+               t.insuranceContactTel,
+               t.insuranceBeginDate,
+               t.insuranceEndDate,
+               t.version,
+               t.time_Create,
+               t.creator,
+               t.time_Modify,
+               t.modifier,
+               t.is_Delete
+          from W_BILL t
+          left join (select flow.wbillid, sum(flow.weight) as pledgedWeight
+                       from w_bill_flow flow
+                       where flow.is_delete = 0
+                      group by flow.wbillid) e
+            on t.wbillid = e.wbillid
+         where t.is_delete = 0
+    </select>
+
+    <select id="queryBillTotal" resultType="int">
+        select count(*)
+          from W_BILL t
+          left join (select flow.wbillid, sum(flow.weight) as pledgedWeight
+                       from w_bill_flow flow
+                       where flow.is_delete = 0
+                      group by flow.wbillid) e
+            on t.wbillid = e.wbillid
+         where t.is_delete = 0
+    </select>
+
+    <select id="queryPledgeList" resultType="com.cofco.sys.entity.members.BillPledgeEntity" resultMap="pledgeMap">
+        select t.id,
+               t.operatorType,
+               t.virtualWbillId,
+               t.pledgerMemberId,
+               t.memberType,
+               t.clientId,
+               t.pledgerContractId,
+               t.operatorName,
+               t.operatorTel,
+               t.operatorId,
+               t.operatorIdAttach,
+               t.pledgeContractAttach,
+               t.pledgeBeginDate,
+               t.pledgeEndDate,
+               t.version,
+               t.is_Delete,
+               e.bill_operator_id,
+               e.weight
+          from w_bill_operator t
+         inner join (select flow.bill_operator_id,
+                            sum(flow.weight) weight
+                       from w_bill_flow flow
+                      where flow.is_delete = 0
+                      group by flow.bill_operator_id) e
+            on t.id = e.bill_operator_id
+           and t.is_delete = 0
+    </select>
+
+    <select id="queryPledgeTotal" resultType="int">
+        select count(*)
+          from w_bill_operator t
+         inner join (select flow.bill_operator_id,
+                            flow.time_create,
+                            sum(flow.weight) weight
+                       from w_bill_flow flow
+                      where flow.is_delete = 0
+                      group by flow.bill_operator_id, flow.time_create) e
+            on t.id = e.bill_operator_id
+           and t.is_delete = 0
+    </select>
+
+    <!--联盟客户日志表-->
+    <insert id="saveLog" parameterType="com.cofco.sys.entity.members.BillOperatorLogEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName"/>w_bill_operator_log
+        (
+        ID,
+        W_BILL_OPERATOR_ID,
+        TEMPID,
+        OPERATORTYPE,
+        AUDITSTATUS
+        )
+        values
+        (
+        SEQ_BILL_OPERATOR_LOG.NEXTVAL,
+        #{wbillOperatorId},
+        #{tempId},
+        #{operatorType},
+        #{auditStatus}
+        )
+    </insert>
+
+    <!--联盟客户日志表更新-->
+    <update id="updateLog" parameterType="com.cofco.sys.entity.members.BillOperatorLogEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>w_bill_operator_log
+        <set>
+            <if test="auditStatus != null">auditStatus = #{auditStatus} </if>
+        </set>
+        where tempId = #{tempId}
+    </update>
+
+    <!--仓单日志表登录-->
+    <insert id="saveBillLog" parameterType="com.cofco.sys.entity.members.BillLogEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName"/>w_bill_operator_log
+        (
+        ID,
+        W_BILL_ID,
+        TEMPID,
+        OPERATORTYPE,
+        AUDITSTATUS
+        )
+        values
+        (
+        SEQ_BILL_LOG.NEXTVAL,
+        #{wbillId},
+        #{tempId},
+        #{operatorType},
+        #{auditStatus}
+        )
+    </insert>
+
+    <!--仓单日志表更新-->
+    <update id="updateBillLog" parameterType="com.cofco.sys.entity.members.BillLogEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>w_bill_operator_log
+        <set>
+            <if test="auditStatus != null">auditStatus = #{auditStatus} </if>
+        </set>
+        where tempId = #{tempId}
+    </update>
+
+    <!--仓单操作记录表 TODO 暂定-->
+    <select id="queryObject" resultType="com.cofco.sys.entity.members.BillOperatorEntity">
+        select t.*
+        from <include refid = "com.cofco.base.dao.JdbcUserName"/> w_bill_operator t
+        where t.is_delete = 0
+        and t.operatortype = #{operatorType}
+        and t.id = #{id}
+    </select>
+
+    <!--预解冻信息查询 TODO 暂定-->
+    <select id="preUnfreezeInfo" resultType="com.cofco.sys.entity.members.BillFlowEntity">
+        select t.*
+        from <include refid = "com.cofco.base.dao.JdbcUserName"/> W_BILL_FLOW t
+        where t.is_delete = 0
+        and t.bill_operator_id = #{id}
+        order by t.id
+    </select>
+
+    <!--仓单质押解质提交-->
+    <update id="update" parameterType="java.util.Map">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>W_BILL_OPERATOR
+        <set>
+            <if test="operatorType != null">OPERATORTYPE = #{operatorType} </if>
+        </set>
+        where id = (select t.w_bill_operator_id from <include refid="com.cofco.base.dao.JdbcUserName"/>w_bill_operator_log t where t.tempId = #{tempId} )
+    </update>
+
+    <!--仓单注销可否判定-->
+    <select id="queryBillDecisionTotal" parameterType="java.lang.String" resultType="int">
+        select count(*)
+          from <include refid = "com.cofco.base.dao.JdbcUserName"/>W_BILL b
+         inner join <include refid = "com.cofco.base.dao.JdbcUserName"/>w_bill_flow f
+            on b.wbillId = f.wbillId
+           and f.is_delete = 0
+         inner join <include refid = "com.cofco.base.dao.JdbcUserName"/>w_bill_operator o
+            on f.bill_operator_id = o.id
+           and o.operatortype != '7'
+           and o.is_delete = 0
+         where b.is_delete = 0
+           and b.id = #{id}
+    </select>
+
+    <!--仓单信息查询-->
+    <select id="queryBillInfo" resultType="com.cofco.sys.entity.members.BillEntity">
+        select t.*
+        from <include refid = "com.cofco.base.dao.JdbcUserName"/> W_BILL t
+        where t.is_delete = 0
+        and t.id = #{id}
+    </select>
+
+    <!--仓单注销-->
+    <update id="billCancel" parameterType="com.cofco.sys.entity.members.BillEntity">
+        update <include refid = "com.cofco.base.dao.JdbcUserName"/> W_BILL
+        <set>
+            <!--修改时间-->
+            <if test = "time_Modify != null"> TIME_MODIFY = #{time_Modify},</if>
+            <!--修改人-->
+            <if test = "modifier != null"> MODIFIER = #{modifier},</if>
+            <!--注销标识-->
+            <if test = "is_Delete != null"> IS_DELETE = #{is_Delete}</if>
+        </set >
+        where id = (select t.w_bill_id from <include refid="com.cofco.base.dao.JdbcUserName"/>w_bill_log t where t.tempId = #{id} )
+    </update>
+
+    <!--仓单操作流水表-->
+    <select id="queryBillFlowList" resultType="com.cofco.sys.entity.members.BillFlowEntity">
+        select t.*
+        from <include refid = "com.cofco.base.dao.JdbcUserName"/> W_BILL_FLOW t
+        where t.is_delete = 0
+        and t.wbillId = #{wbillId}
+        order by t.id
+    </select>
+
+    <!--仓单操作记录表注销-->
+    <update id="updateBillOperator" parameterType="java.lang.String">
+        update <include refid = "com.cofco.base.dao.JdbcUserName"/> W_BILL_OPERATOR
+        <set>
+            <!--注销标识-->
+            IS_DELETE = 1
+        </set >
+        where id = #{id}
+    </update>
+
+    <!--仓单操作流水表注销-->
+    <update id="updateBillFlow" parameterType="java.lang.String">
+        update <include refid = "com.cofco.base.dao.JdbcUserName"/> W_BILL_FLOW
+        <set>
+            <!--注销标识-->
+            IS_DELETE = 1
+        </set >
+        where id = #{id}
+    </update>
+
+    <!--仓单操作流水表-->
+    <select id="queryFlowId" resultType="java.lang.String">
+        select f.id
+          from w_bill_flow f
+         where f.bill_operator_id = (select t.w_bill_operator_id
+                                     from w_bill_operator_log t
+                                    where t.tempId = #{tempId})
+    </select>
+
+    <!--仓单重量更新 TODO-->
+    <update id="updateWeight" parameterType="java.util.List">
+        begin
+        <foreach collection="list" item="item" index="index" separator=";" >
+            update
+            <include refid="com.cofco.base.dao.JdbcUserName"/>w_bill_flow
+            set
+            weight = '0'
+            where id = #{item}
+        </foreach>
+        ;end;
+    </update>
+
+    <!--防止重复提交申请-->
+    <select id="queryOperatorLogTotal" resultType="int">
+        select count(log.id)
+          from w_bill_operator_log log
+         where log.w_bill_operator_id = #{id}
+           and log.operatortype = #{operatorType}
+    </select>
+</mapper>

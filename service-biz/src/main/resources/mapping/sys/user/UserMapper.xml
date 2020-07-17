@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.user.UserDao">
+
+
+    <resultMap type="com.cofco.sys.entity.user.UserEntity" id="userMap">
+        <result property="id" column="id"/>
+        <result property="bapid" column="bapid"/>
+        <result property="baid" column="baid"/>
+        <result property="userName" column="user_name"/>
+        <result property="loginName" column="login_name"/>
+        <result property="passWord" column="pass_word"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="status" column="status"/>
+        <result property="salt" column="salt"/>
+        <result property="phone" column="phone"/>
+        <result property="photo" column="photo"/>
+        <result property="email" column="email"/>
+        <result property="createId" column="create_id"/>
+        <result property="updateId" column="update_id"/>
+        <result property="remark" column="remark"/>
+		<result property="sign" column="sign"/>
+		<result property="sort" column="sort"/>
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+		id, 
+		bapid,
+		baid,
+		user_name,
+		login_name, 
+		pass_word, 
+		create_time, 
+		update_time, 
+		status, 
+		salt,
+		phone,
+		photo, 
+		email, 
+		create_id, 
+		update_id, 
+		remark,
+		sort
+    </sql>
+
+	<select id="queryObject" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+		select
+		<include refid="Base_Column_List" />,(SELECT name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=s.baid) AS baName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user s
+		where id = #{value}
+	</select>
+	<!--根据登陆用户查询有效的用户-->
+	<select id="queryByLoginName" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+		select
+		<include refid="Base_Column_List" />,(SELECT name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=u.baid) AS baName,
+		(SELECT name FROM <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o WHERE o.id=u.bapid) AS bapName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user u
+		where login_name = #{0}
+		order by u.sort
+	</select>
+
+	<!--用户对应的组织id,数据权限控制-->
+	<select id="queryOrganIdByUserId" resultType="java.util.Map">
+		select
+			o.id organId,orl.role_id roleId
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role ur LEFT JOIN
+			<include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON ur.role_id=orl.role_id LEFT JOIN
+			<include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id=o.id
+		where ur.user_id=#{0} AND o.type=#{1}
+	</select>
+
+	<!--用户对应的组织id,数据权限控制 返回数组-->
+	<select id="queryOrganIdByUserIdArray" resultType="java.lang.String">
+		select
+		o.id
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role ur LEFT JOIN
+		<include refid="com.cofco.base.dao.JdbcUserName"/>sys_role r on ur.role_id = r.id LEFT JOIN
+		<include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON ur.role_id=orl.role_id LEFT JOIN
+		<include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id=o.id
+		where ur.user_id=#{0} AND o.type=#{1} AND r.status = '0'
+	</select>
+
+	<select id="queryList" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+		select
+		s.id,
+		s.bapid,
+		s.baid,
+		s.user_name,
+		s.login_name,
+		s.pass_word,
+		s.create_time,
+		s.update_time,
+		s.status,
+		s.salt,
+		s.phone,
+		s.photo,
+		s.email,
+		s.create_id,
+		s.update_id,
+		s.remark,
+		o.simplify_name  AS baName,
+		o.simplify_name AS bapName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user s
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON o.id=s.bapid
+		WHERE 1=1
+		<if test="userid != '-1'.toString()" >
+			<include refid="com.cofco.base.dao.UserIdDataAuth"/>
+		</if>
+		<if test="bapid != null and bapid.trim() != ''" >
+			AND s.bapid =#{bapid}
+		</if>
+		<if test="userName != null and userName.trim() != ''" >
+			AND s.user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by s.create_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select
+		count(*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user s
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON o.id=s.bapid
+		WHERE 1=1
+		<if test="userid != '-1'.toString()" >
+			<include refid="com.cofco.base.dao.UserIdDataAuth"/>
+		</if>
+		<if test="bapid != null and bapid.trim() != ''" >
+		AND s.bapid =#{bapid}
+		</if>
+		<if test="userName != null and userName.trim() != ''" >
+			AND s.user_name like concat(concat('%',#{userName}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+		</choose>
+
+	</select>
+
+	<select id="enableList" resultType="com.cofco.sys.entity.user.UserEntity" resultMap="userMap">
+		SELECT
+		T2.id,
+		T2.bapid,
+		T2.baid,
+		T2.user_name,
+		T2.login_name,
+		T2.pass_word,
+		T2.create_time,
+		T2.update_time,
+		T2.status,
+		T2.salt,
+		T2.phone,
+		T2.photo,
+		T2.email,
+		T2.create_id,
+		T2.update_id,
+		T2.remark,
+		SO.simplify_name AS bapName
+		FROM
+		(SELECT
+			su.id,
+			su.bapid,
+			su.baid,
+			su.user_name,
+			su.login_name,
+			su.pass_word,
+			su.create_time,
+			su.update_time,
+			su.status,
+			su.salt,
+			su.phone,
+			su.photo,
+			su.email,
+			su.create_id,
+			su.update_id,
+			su.remark
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER SU WHERE SU.STATUS=0
+		<if test="organId != null and organId.trim() != ''" >
+			AND SU.BAPID=#{organId}
+		</if>
+		UNION
+		SELECT
+			su1.id,
+			su1.bapid,
+			su1.baid,
+			su1.user_name,
+			su1.login_name,
+			su1.pass_word,
+			su1.create_time,
+			su1.update_time,
+			su1.status,
+			su1.salt,
+			su1.phone,
+			su1.photo,
+			su1.email,
+			su1.create_id,
+			su1.update_id,
+			su1.remark
+		FROM
+		(SELECT SL.USER_ID FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_LEND SL WHERE SL.STATUS=0
+		<if test="organId != null and organId.trim() != ''" >
+			AND SL.NEW_ORGAN_ID=#{organId}
+		</if>
+		) T1
+		INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER SU1
+		ON T1.USER_ID=SU1.ID AND SU1.STATUS=0) T2
+		INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SO
+		ON T2.bapid = SO.ID
+
+		<if test="userName != null and userName.trim() != ''" >
+			AND T2.USER_NAME like concat(concat('%',#{userName}),'%')
+		</if>
+		<if test="notUserId != null and notUserId.trim() != ''" >
+			AND T2.id not in(#{notUserId})
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by T2.bapid desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="enableTotal" resultType="int">
+		SELECT
+			count(1)
+		FROM
+		(SELECT
+			su.id,
+			su.bapid,
+			su.baid,
+			su.user_name,
+			su.login_name,
+			su.pass_word,
+			su.create_time,
+			su.update_time,
+			su.status,
+			su.salt,
+			su.phone,
+			su.photo,
+			su.email,
+			su.create_id,
+			su.update_id,
+			su.remark
+		FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER SU WHERE SU.STATUS=0
+		<if test="organId != null and organId.trim() != ''" >
+			AND SU.BAPID=#{organId}
+		</if>
+		UNION
+		SELECT
+			su1.id,
+			su1.bapid,
+			su1.baid,
+			su1.user_name,
+			su1.login_name,
+			su1.pass_word,
+			su1.create_time,
+			su1.update_time,
+			su1.status,
+			su1.salt,
+			su1.phone,
+			su1.photo,
+			su1.email,
+			su1.create_id,
+			su1.update_id,
+			su1.remark
+		FROM
+		(SELECT SL.USER_ID FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_LEND SL WHERE SL.STATUS=0
+		<if test="organId != null and organId.trim() != ''" >
+			AND SL.NEW_ORGAN_ID=#{organId}
+		</if>
+		) T1
+		INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER SU1
+		ON T1.USER_ID=SU1.ID AND SU1.STATUS=0) T2
+		INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SO
+		ON T2.bapid = SO.ID
+
+		<if test="userName != null and userName.trim() != ''" >
+			AND T2.USER_NAME like concat(concat('%',#{userName}),'%')
+		</if>
+		<if test="notUserId != null and notUserId.trim() != ''" >
+			AND T2.id not in(#{notUserId})
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by T2.bapid desc
+			</otherwise>
+		</choose>
+
+	</select>
+
+	<select id="queryListByBean" resultType="com.cofco.dto.UserWindowDto">
+		select
+		su.id,su.user_name AS name,bapid
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user su
+		WHERE 1=1
+		AND su.BAPID IN(
+		SELECT ID FROM (SELECT CODE from (SELECT BAPID FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER WHERE ID =#{id} ) SU
+		INNER JOIN
+		<include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SO ON SU.BAPID=SO.ID) CODE_SIGN
+		INNER JOIN
+		<include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN  SYS_OR  ON  SYS_OR.CODE  LIKE CODE_SIGN.CODE||'%'
+		)
+		<if test="name != null and name.trim() != ''" >
+			AND su.user_name LIKE concat(concat('%',#{name}),'%')
+		</if>
+		order by create_time
+	</select>
+
+	<select id="checklogin" resultType="int" parameterType="com.cofco.sys.entity.user.UserEntity">
+		SELECT count(*) from  <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER s  where  s.login_name = #{loginName}
+        <if test="id != null and id.trim() != ''" >
+			AND   s.id != #{id}
+		</if>
+	</select>
+
+	<insert id="save"  parameterType="com.cofco.sys.entity.user.UserEntity">
+		insert into <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user
+		(
+			id,
+			bapid,
+			baid,
+			user_name,
+			login_name,
+			pass_word,
+			create_time,
+			update_time,
+			status,
+			salt,
+			phone,
+			photo,
+			email,
+			create_id,
+			update_id,
+			remark,
+			sort
+		)
+		values
+		(
+			#{id},
+			#{bapid},
+			#{baid},
+			#{userName},
+			#{loginName},
+			#{passWord},
+			#{createTime},
+			#{updateTime},
+			#{status},
+			#{salt},
+			#{phone},
+			#{photo},
+			#{email},
+			#{createId},
+			#{updateId},
+			#{remark},
+			#{sort}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.cofco.sys.entity.user.UserEntity">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user
+		<set>
+			<if test="bapid != null">bapid = #{bapid,jdbcType=VARCHAR}, </if>
+			<if test="baid != null">baid = #{baid,jdbcType=VARCHAR}, </if>
+			<if test="userName != null">user_name = #{userName,jdbcType=VARCHAR}, </if>
+			<if test="loginName != null">login_name = #{loginName,jdbcType=VARCHAR}, </if>
+			<if test="passWord != null">pass_word = #{passWord,jdbcType=VARCHAR}, </if>
+			<if test="createTime != null">create_time = #{createTime,jdbcType=DATE}, </if>
+			<if test="updateTime != null">update_time = #{updateTime,jdbcType=DATE}, </if>
+			<if test="status != null">status = #{status,jdbcType=DECIMAL}, </if>
+			<if test="salt != null">salt = #{salt,jdbcType=VARCHAR}, </if>
+			<if test="phone != null">phone = #{phone,jdbcType=VARCHAR}, </if>
+			<if test="photo != null">photo = #{photo,jdbcType=VARCHAR}, </if>
+			<if test="email != null">email = #{email,jdbcType=VARCHAR}, </if>
+			<if test="createId != null">create_id = #{createId,jdbcType=VARCHAR}, </if>
+			<if test="updateId != null">update_id = #{updateId,jdbcType=VARCHAR}, </if>
+			<if test="sort != null">sort = #{sort,jdbcType=VARCHAR}, </if>
+			<if test="remark != null">remark = #{remark,jdbcType=VARCHAR}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<update id="updatePassword" parameterType="java.util.Map">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user
+		set pass_word=#{passWord},salt=#{salt}
+		where id = #{id}
+	</update>
+
+	<!--批量重置密码-->
+	<update id="resetPassWord" parameterType="java.util.Map">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user
+		set pass_word=#{passWord},salt=#{salt}
+		where id IN
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<!--批量更新用户状态-->
+	<update id="updateBatchStatus" parameterType="java.util.Map">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user
+		set status=#{status}
+		where id IN
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<delete id="delete">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

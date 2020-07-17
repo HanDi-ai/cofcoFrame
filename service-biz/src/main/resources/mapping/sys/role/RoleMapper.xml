@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.role.RoleDao">
+
+
+    <resultMap type="com.cofco.sys.entity.role.RoleEntity" id="roleMap">
+        <result property="id" column="id"/>
+        <result property="bapid" column="bapid"/>
+        <result property="baid" column="baid"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="status" column="status"/>
+        <result property="roleType" column="role_type"/>
+        <result property="remark" column="remark"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateId" column="update_id"/>
+        <result property="createId" column="create_id"/>
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+		id, 
+		name,
+		code, 
+		status, 
+		role_type, 
+		remark, 
+		update_time, 
+		create_time, 
+		update_id, 
+		create_id
+    </sql>
+
+	<select id="queryObject" resultType="com.cofco.sys.entity.role.RoleEntity" resultMap="roleMap">
+		select
+		<include refid="Base_Column_List" />
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role
+		where id = #{value}
+	</select>
+	<select id="queryByUserId" resultType="com.cofco.sys.entity.role.RoleEntity" resultMap="roleMap">
+		select
+		r.id,r.name,r.code,r.status
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role ur
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role r ON ur.role_id=r.id
+		where ur.user_id = #{0} AND r.status = #{1}
+	</select>
+
+	<!--根据角色id查询可用的组织机构-->
+	<select id="queryOrganRoleByRoleId"  resultType="com.cofco.sys.entity.role.RoleEntity" >
+		select
+			o.id AS organId,
+			o.name AS organName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where orl.role_id = #{roleId} AND o.is_del = '0'
+	</select>
+
+	<!--根据角色id查询可用的组织机构-->
+	<select id="queryPageByDto" resultType="com.cofco.dto.UserWindowDto" >
+		select
+		DISTINCT
+		ro.id,ro.name,ro.bapid
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role ro, <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role sor, <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user su
+		where
+		ro.id = sor.role_id
+		and  sor.organ_id in (
+		SELECT ID FROM (SELECT CODE from (SELECT BAPID FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER WHERE ID =#{id} ) SU
+		INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN SO ON SU.BAPID=SO.ID) CODE_SIGN
+		INNER JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN  SYS_OR  ON  SYS_OR.CODE  LIKE CODE_SIGN.CODE||'%')
+		<if test="name != null and name != '' ">
+			AND ro.name LIKE concat(concat('%',#{name}),'%')
+		</if>
+	</select>
+	<select id="queryList" resultType="com.cofco.sys.entity.role.RoleEntity" resultMap="roleMap">
+
+			select
+			rol.id,
+			rol.name,
+			rol.code,
+			rol.status,
+			rol.role_type,
+			rol.remark,
+			rol.update_time,
+			rol.create_time,
+			rol.update_id,
+			rol.create_id,
+			o.sort,
+		    o.type,
+			o.simplify_name AS organName
+			from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+			LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+			LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where o.type ='1'
+		AND o.IS_DEL='0'
+		<if test="userid != '-1'.toString()" >
+		<include refid="com.cofco.base.dao.UserIdDataAuth"/>
+		</if>
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by rol.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by rol.create_time desc
+			</otherwise>
+        </choose>
+
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select
+  		count (*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where o.type ='1'
+		AND
+			  o.IS_DEL='0'
+		<include refid="com.cofco.base.dao.UserIdDataAuth"/>
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+	</select>
+	 
+	<insert id="save" parameterType="com.cofco.sys.entity.role.RoleEntity">
+		insert into <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role
+		(
+			id,
+			bapid,
+			baid,
+			name,
+			code,
+			status,
+			role_type,
+			remark,
+			update_time,
+			create_time,
+			update_id,
+			create_id
+		)
+		values
+		(
+			#{id}, 
+			#{bapid},
+			#{baid},
+			#{name},
+			#{code}, 
+			#{status}, 
+			#{roleType}, 
+			#{remark}, 
+			#{updateTime}, 
+			#{createTime}, 
+			#{updateId}, 
+			#{createId}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.cofco.sys.entity.role.RoleEntity">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role
+
+		<set>
+			<if test="name != null">
+
+				name = #{name,jdbcType=VARCHAR},
+
+			</if>
+			<if test="organId != null">
+
+				bapid = #{organId,jdbcType=VARCHAR},
+
+			</if>
+			<if test="organId != null">
+
+				baid = #{organId,jdbcType=VARCHAR},
+
+			</if>
+			<if test="code != null">
+
+			 code = #{code,jdbcType=VARCHAR},
+
+			</if>
+			<if test="status != null">
+
+			 status = #{status,jdbcType=DECIMAL},
+
+			</if>
+			<if test="roleType != null">
+
+			 role_type = #{roleType,jdbcType=VARCHAR},
+
+			</if>
+			<if test="remark != null">
+
+			 remark = #{remark,jdbcType=VARCHAR},
+
+			</if>
+
+			<if test="updateTime != null">
+
+				update_time = #{updateTime,jdbcType=DATE},
+
+			</if>
+			<if test="createTime != null">
+
+				create_time = #{createTime,jdbcType=DATE},
+
+			</if>
+			<if test="updateId != null">
+
+				update_id = #{updateId,jdbcType=VARCHAR},
+
+			</if>
+			<if test="createId != null">
+
+				create_id = #{createId,jdbcType=VARCHAR}
+
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<!--批量更新角色状态-->
+	<update id="updateBatchStatus" parameterType="java.util.Map">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role
+		set status=#{status}
+		where id IN
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<delete id="delete">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role where id = #{value}
+	</delete>
+
+	<!--根据角色id删除角色和组织关系表-->
+	<delete id="delRoleOrganByRoleId">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role where role_id = #{roleId}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role where id in
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+	</delete>
+
+	<!--保存组织机构与角色关系表-->
+	<insert id="batchSaveRoleOrgan" parameterType="com.cofco.sys.entity.role.RoleEntity">
+
+		insert into <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role
+		(
+		role_id,
+		organ_id
+		)
+		values
+
+			(
+			#{id},
+			#{organId}
+			)
+	</insert>
+	<!--角色重复判断-->
+	<select id="checkrole" resultType="int"  parameterType="com.cofco.sys.entity.role.RoleEntity">
+		SELECT count(*) from  <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role s  where  s.name=#{name} AND s.bapid=#{organId}
+		<if test="id != null and id.trim() != ''" >
+			AND s.id != #{id}
+		</if>
+	</select>
+
+</mapper>

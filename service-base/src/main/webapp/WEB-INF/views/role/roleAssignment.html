@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>角色管理</title>
+	#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-2">
+				<input  type="hidden"  @keyup.enter="query" v-model="q.organId" >
+				<div class="input-group">
+					<input  class="form-control" readonly @click="organTree"  @keyup.enter="query" v-model="q.organName" placeholder="选择所属机构">
+					<span class="input-group-addon" style="background-color:#009688;color: #FFFFFF; " ><a @click="clear" style="cursor:pointer;color: #FFFFFF" >X</a></span>
+				</div>
+			</div>
+			<div class="form-group col-sm-2">
+				<input class="form-control" v-model="q.roleName" @keyup.enter="query" placeholder="角色名称">
+			</div>
+			<button class="layui-btn" id="searchSubmit" @click="query"><i class="layui-icon">&#xe615;</i>查 询</button>
+
+			<button class="layui-btn" @click="update" type="button"><i class="layui-icon">&#xe61f;</i>角色分配</button>
+
+		</div>
+		<table id="jqGrid"></table>
+		<div id="jqGridPager"></div>
+	</div>
+
+	<div v-show="!showList" class="panel panel-default" >
+		<input type="hidden" v-model="role.id" id="role_id"/>
+		<div class="panel-heading">{{title}}<span style="margin-left: 35%" id="roleName_div"></span></div>
+		<div class="row">
+			<div class="col-md-5">
+				<div class="form-group" >
+					<div class="layui-bg-green col-sm-2" >已拥有用户</div>
+				</div>
+				<div class="form-group" >
+					<div class="col-sm-5">
+						<input class="form-control" v-model="q.userNameYes" @keyup.enter="queryYes" placeholder="用户名"/>
+					</div>
+					<button class="layui-btn" type="button" id="searchSubmitOne" @click="queryYes"><i class="layui-icon">&#xe615;</i>查 询</button>
+				</div>
+				<table id="jqGrid1"></table>
+				<div id="jqGridPager1"></div>
+			</div>
+			<div class="col-md-2" align="center" >
+				<div class="form-group lendChoicetop">
+					<button class="layui-btn" type="button" @click="noToYes" ><i class="layui-icon">&#xe65a;</i></button>
+				</div>
+				<div class="lendChoice">
+				</div>
+				<div class="form-group" >
+					<button class="layui-btn"  type="button" @click="yesToNo"><i class="layui-icon">&#xe65b;</i></button>
+				</div>
+			</div>
+			<div class="col-md-5" id="wid">
+				<div class="form-group" >
+					<div class="layui-bg-green col-sm-2" >未拥有用户</div>
+				</div>
+				<div class="form-group" >
+					<div class="col-sm-5">
+						<input class="form-control" placeholder="用户名"  v-model="q.userNameNo" @keyup.enter="queryNo"/>
+					</div>
+					<button class="layui-btn" type="button" id="searchSubmitTwo" @click="queryNo"><i class="layui-icon">&#xe615;</i>查 询</button>
+				</div>
+				<table id="jqGrid2"></table>
+				<div id="jqGridPager2"></div>
+			</div>
+		</div>
+		<div class="form-group" align="right" >
+			<button class="layui-btn layui-btn-warm" type="button" @click="reload">返回</button>
+		</div>
+	</div>
+</div>
+
+<!-- 选择机构 -->
+<div id="menuLayer" style="display: none; position: 10px;">
+	<ul id="organTree" class="ztree"></ul>
+</div>
+
+<script src="${rc.contextPath}/statics/js/role/roleAssignment.js?_${date.systemTime}"></script>
+</body>
+</html>

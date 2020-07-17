@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.user.UserGrantRolesDao">
+
+
+	<resultMap type="com.cofco.sys.entity.role.RoleEntity" id="roleMap">
+		<result property="id" column="id"/>
+		<result property="bapid" column="bapid"/>
+		<result property="baid" column="baid"/>
+		<result property="name" column="name"/>
+		<result property="code" column="code"/>
+		<result property="status" column="status"/>
+		<result property="roleType" column="role_type"/>
+		<result property="remark" column="remark"/>
+		<result property="updateTime" column="update_time"/>
+		<result property="createTime" column="create_time"/>
+		<result property="updateId" column="update_id"/>
+		<result property="createId" column="create_id"/>
+	</resultMap>
+
+	<sql id="Base_Column_List" >
+		id,
+		name,
+		code,
+		status,
+		role_type,
+		remark,
+		update_time,
+		create_time,
+		update_id,
+		create_id
+    </sql>
+
+	<select id="queryList" resultType="com.cofco.sys.entity.role.RoleEntity" resultMap="roleMap">
+
+		select
+		rol.id,
+		rol.name,
+		rol.code,
+		rol.status,
+		rol.role_type,
+		rol.remark,
+		rol.update_time,
+		rol.create_time,
+		rol.update_id,
+		rol.create_id,
+		o.sort,
+		o.type,
+		o.simplify_name AS organName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where o.type ='1'
+		AND rol.id  in (select role_id from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role where user_id=#{userId})
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by o.sort,rol.create_time desc
+			</otherwise>
+		</choose>
+
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select
+		count (*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where o.type ='1'
+		AND rol.id  in (select role_id from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role where user_id=#{userId})
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by o.sort,rol.create_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+
+	<select id="notinList" resultType="com.cofco.sys.entity.role.RoleEntity" resultMap="roleMap">
+
+		select
+		rol.id,
+		rol.name,
+		rol.code,
+		rol.status,
+		rol.role_type,
+		rol.remark,
+		rol.update_time,
+		rol.create_time,
+		rol.update_id,
+		rol.create_id,
+		o.sort,
+		o.type,
+		o.simplify_name AS organName
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where o.type ='1'
+		AND rol.id not in (select role_id from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role where user_id=#{userId})
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by o.sort,rol.create_time desc
+			</otherwise>
+		</choose>
+
+	</select>
+
+	<select id="notinTotal" resultType="int">
+		select
+		count (*)
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_role rol
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ_role orl ON orl.role_id = rol.id
+		LEFT JOIN <include refid="com.cofco.base.dao.JdbcUserName"/>sys_organ o ON orl.organ_id = o.id
+		where o.type ='1'
+		AND rol.id not in (select role_id from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role where user_id=#{userId})
+		<if test="organId != null and organId.trim() != ''" >
+			AND o.id=#{organId}
+		</if>
+		<if test="roleName != null and roleName.trim() != ''" >
+			AND rol.name like concat(concat('%',#{roleName}),'%')
+		</if>
+
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by o.sort,rol.create_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<delete id="relieve" parameterType="com.cofco.sys.entity.user.UserRoleEntity">
+		begin
+		<foreach collection="roleIdList" item="item" index="index" separator=";" >
+			delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_user_role
+			where
+			user_id = #{userId}
+			AND
+			role_id =  #{item}
+		</foreach>
+		;end;
+	</delete>
+
+
+
+</mapper>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>系统日志</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div>
+		<div class="grid-btn">
+
+				<div class="col-md-2">
+					<input type="text" class="form-control" v-model="q.key" @keyup.enter="query" placeholder="用户名、用户操作">
+				</div>
+
+				<div class="col-md-2">
+						<input class="layui-input" id="start"  v-model="q.starttime" type="text" placeholder="开始时间">
+				</div>
+				<div class="col-md-2">
+					<input class="layui-input" id="end"  v-model="q.startend" type="text" placeholder="结束时间">
+				</div>
+				<div class="col-md-2">
+					<select  id="selectsign"  v-model="q.sign" class="form-control">
+								<option value="1">weblog</option>
+								<option value="0">applog</option>
+					</select>
+				</div>
+
+				<button class="layui-btn" id="searchSubmit" @click="query"><i class="layui-icon">&#xe615;</i>查 询</button>
+
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+</div>
+
+<script src="${rc.contextPath}/statics/js/log/log.js?_${date.systemTime}"></script>
+</body>
+</html>

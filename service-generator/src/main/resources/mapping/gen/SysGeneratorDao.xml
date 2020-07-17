@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.gen.dao.SysGeneratorDao">
+
+	<!--数据库为mysql时的代码生成页面基础sql-->
+	<!--<select id="queryList" resultType="map">-->
+		<!--select table_name tableName, engine, table_comment tableComment, create_time createTime from information_schema.tables-->
+		<!--where table_schema = (select database())-->
+		<!--<if test="tableName != null and tableName.trim() != ''">-->
+			<!--and table_name like concat('%', #{tableName}, '%')-->
+		<!--</if>-->
+		<!--order by create_time desc-->
+		<!--<if test="offset != null and limit != null">-->
+			<!--limit #{offset}, #{limit}-->
+		<!--</if>-->
+	<!--</select>-->
+
+	<!--<select id="queryTotal" resultType="int">-->
+		<!--select count(*) from information_schema.tables where table_schema = (select database())-->
+		<!--<if test="tableName != null and tableName.trim() != ''">-->
+			<!--and table_name like concat('%', #{tableName}, '%')-->
+		<!--</if>-->
+	<!--</select>-->
+
+	<!--<select id="queryTable" resultType="map">-->
+		<!--select table_name tableName, engine, table_comment tableComment, create_time createTime from information_schema.tables-->
+			<!--where table_schema = (select database()) and table_name = #{tableName}-->
+	<!--</select>-->
+
+	<!--<select id="queryColumns" resultType="map">-->
+		<!--select column_name columnName, data_type dataType, column_comment columnComment, column_key columnKey, extra from information_schema.columns-->
+ 			<!--where table_name = #{tableName} and table_schema = (select database()) order by ordinal_position-->
+	<!--</select>-->
+
+	<!--数据库为oracle时的代码生成页面基础sql  因mysql有自增主键 需要 改 相关生成文件位置的一些内容 包括住生成代码文件的内容-->
+	<!--Dao.xml.vm,GenUtils.java,SysGeneratorController.java等-->
+	<resultMap type="com.cofco.gen.entity.TableEntity" id="TableMap">
+		<result property="tableName" column="table_name"/>
+		<result property="comments" column="comments"/>
+	</resultMap>
+
+	<!--数据库表名，表注释的列表-->
+	<select id="queryList" resultType="com.cofco.gen.entity.TableEntity" resultMap="TableMap">
+		select a.TABLE_NAME, b.COMMENTS
+		from dba_tables a, user_tab_comments b
+		WHERE a.TABLE_NAME = b.TABLE_NAME and a.owner='cofco_frame'
+	</select>
+
+	<!--数据库表总数-->
+	<select id="queryTotal" resultType="int">
+		select count(*)
+		from dba_tables a, user_tab_comments b
+		WHERE a.TABLE_NAME = b.TABLE_NAME and a.owner='cofco_frame'
+	</select>
+
+	<!--生成代码表的名字和表注释-->
+	<select id="queryTable" resultType="map">
+		select a.TABLE_NAME, b.COMMENTS
+		from dba_tables a, user_tab_comments b
+		WHERE a.TABLE_NAME = b.TABLE_NAME and a.owner='cofco_frame' and a.TABLE_NAME=#{tableName}
+	</select>
+
+	<!--生成代码表的字段名，字段注释，字段长度，字段类型-->
+	<select id="queryColumns" resultType="map">
+		SELECT b.column_name,
+      	b.data_type,
+      	b.data_length,
+      	a.comments
+		FROM user_col_comments a,all_tab_columns b
+		WHERE a.table_name = b.table_name and a.column_name = b.COLUMN_NAME and a.TABLE_NAME=#{tableName}
+	</select>
+
+	<!--生成代码表的主键-->
+	<select id="queryP" resultType="java.lang.String">
+		select cu.column_name
+		from user_cons_columns cu, user_constraints au
+		where cu.constraint_name = au.constraint_name and au.constraint_type = 'P' and au.table_name =#{tableName}
+	</select>
+
+	<!--数据库视图名，表注释的列表-->
+	<select id="view" resultType="com.cofco.gen.entity.TableEntity" resultMap="TableMap">
+		select view_name as tableName,text_length as COMMENTS from user_views
+	</select>
+
+	<!--数据库视图总数-->
+	<select id="viewTo" resultType="int">
+		select count(*) from user_views
+	</select>
+
+	<!--生成代码视图的字段名，字段注释，字段长度，字段类型-->
+	<select id="queryColumnsView" resultType="map">
+		SELECT tc.column_name,
+      	tc.data_type,
+      	tc.data_length,
+      	cc.comments FROM user_tab_cols tc,user_col_comments cc WHERE
+		tc.table_name = cc.table_name and tc.column_name = cc.column_name and tc.table_name = #{tableName}
+	</select>
+</mapper>

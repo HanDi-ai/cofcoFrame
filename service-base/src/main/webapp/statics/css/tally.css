@@ -1,0 +1,121 @@
+[v-cloak] {
+    display: none;
+}
+.perform-tally-title span {
+    font-size: 14px;
+    font-weight:bold;
+    display: inline-block;
+}
+.common-overflow-hidden {
+    overflow: hidden;
+}
+.tally-details-table {
+    margin-top: 10px;
+    padding-right:10px;
+}
+.delivery-location-wrapper,.shipment-information-wrapper {
+    width: 50%;
+}
+.delivery-location-wrapper {
+    padding-bottom: 20px;
+    padding-top:10px;
+    border-top:1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    padding-left: 10px;
+}
+.shipment-information-wrapper {
+    padding-top:20px;
+    border-top:1px solid #ccc;
+}
+.shipment-information-wrapper .perform-tally-title,.shipment-information-wrapper .shipment-information-table {
+    padding-left: 10px;
+}
+.tally-details-wrapper {
+    width: 100%;
+    padding-top:20px;
+    border-top:2px solid #ccc;
+}
+#jqGrid-location  tbody tr.jqgrow td {
+    padding-right:8px !important;
+}
+.form-label-red {
+    color: #FF0000;
+}
+.delivery-location-wrapper {
+    padding-top: 20px;
+    border-top: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+.delivery-location-wrapper form .col-md-9 input,.delivery-location-wrapper form .col-md-9 select {
+    width: 195px;
+}
+.delivery-location-wrapper form label input {
+    width: auto !important;
+}
+.delivery-location-wrapper form .form-checkbox-wrapper {
+    width:195px;
+}
+.form-location-wrapper .form-group:first-child,.form-location-wrapper .form-group:nth-child(2) {
+    margin-bottom: 15px;
+}
+.row {
+    margin-left: -15px;
+    margin-right:-15px;
+    padding: 0px;
+}
+.form-location-wrapper .form-group {
+    width: 100%;
+}
+.form-location-wrapper .control-label  {
+    padding-top: 0px;
+    overflow:hidden;
+}
+.table-title {
+    margin-top:10px;
+}
+.shipmentInformationDesc p:not(:first-child) {
+    margin-top:5px;
+}
+.shipmentInformationDesc {
+    margin-bottom: 36px;
+}
+
+table input {
+    height: 20px !important;
+    padding: 0px !important;
+}
+input[type=checkbox], input[type=radio] {
+    margin: 0px;
+}
+.page-header-title {
+    font-weight: bold;
+    font-size:14px;
+}
+.page-header-wrapper {
+    margin-top:0px;
+    margin-bottom:10px;
+}
+.form-select-plan-pop input,.form-select-plan-pop select {
+    width:195px !important;
+}
+.plan-select-wrapper .modal-title {
+    font-weight: bold;
+    font-size: 16px;
+}
+.table-bottom12 {
+    margin-bottom:12px;
+}
+.plan-select-wrapper table input[type=radio] {
+    width:15px;
+    height:15px;
+}
+table.ui-jqgrid-btable input {
+    height: 35px !important;
+}
+.form-wrapper {
+    height: 102px;
+}
+.perform-tally-title {
+    padding-right:10px;
+}

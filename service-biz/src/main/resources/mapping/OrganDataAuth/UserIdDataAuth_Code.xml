@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.base.dao">
+    <!-- 获取当前登陆者组织机构数据权限公共控制类 组织机构树 -->
+    <sql  id="UserIdDataAuth_Code" >
+
+        SELECT CODE FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_ORGAN WHERE ID IN(
+            SELECT DISTINCT ID FROM (
+            SELECT BAPID AS ID FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_USER WHERE ID =#{userId}
+            UNION
+            SELECT NEW_ORGAN_ID AS ID FROM <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_LEND WHERE USER_ID =#{userId} AND STATUS='0'
+            )
+        )
+    </sql>
+</mapper>

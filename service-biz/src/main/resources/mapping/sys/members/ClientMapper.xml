@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.members.ClientDao">
+
+    <resultMap type="com.cofco.sys.entity.members.AllianceClientEntity" id="clientMap">
+        <result property="id" column="id"/>
+        <result property="clientId" column="clientId"/>
+        <result property="memberId" column="memberId"/>
+        <result property="clientName" column="clientName"/>
+        <result property="clientAddr" column="clientAddr"/>
+        <result property="clientTel" column="clientTel"/>
+        <result property="clientOrgNo" column="clientOrgNo"/>
+        <result property="clientOrgAttach" column="clientOrgAttach"/>
+        <result property="regMoney" column="regMoney"/>
+        <result property="bankInfo" column="bankInfo"/>
+        <result property="property" column="property"/>
+        <result property="propertyName" column="property"/>
+        <result property="corporateName" column="corporateName"/>
+        <result property="corporateTel" column="corporateTel"/>
+        <result property="corporateId" column="corporateId"/>
+        <result property="corporateIdAttach" column="corporateIdAttach"/>
+        <result property="contactName" column="contactName"/>
+        <result property="contactTel" column="contactTel"/>
+        <result property="contactId" column="contactId"/>
+        <result property="contactIdAttach" column="contactIdAttach"/>
+        <result property="version" column="version"/>
+        <result property="timeCreate" column="timeCreate"/>
+        <result property="creator" column="creator"/>
+        <result property="timeModify" column="timeModify"/>
+        <result property="modifier" column="modifier"/>
+        <result property="isDelete" column="isDelete"/>
+    </resultMap>
+
+    <!--联盟客户信息查询  暂定 TODO-->
+    <select id="queryList" resultType="com.cofco.sys.entity.members.AllianceClientEntity" resultMap="clientMap">
+        select t.id,
+               t.clientId,
+               t.memberId,
+               t.clientName,
+               t.clientAddr,
+               t.clientTel,
+               t.clientOrgNo,
+               t.clientOrgAttach,
+               t.regMoney,
+               t.bankInfo,
+               t.property,
+               t.property as propertyName,
+               t.corporateName,
+               t.corporateTel,
+               t.corporateId,
+               t.corporateIdAttach,
+               t.contactName,
+               t.contactTel,
+               t.contactId,
+               t.contactIdAttach,
+               t.version,
+               t.time_Create,
+               t.creator,
+               t.time_Modify,
+               t.modifier,
+               t.is_Delete
+          from alliance_client t
+         where t.is_delete = 0
+    </select>
+
+    <!--联盟客户信息查询  暂定 TODO-->
+    <select id="queryTotal" resultType="int">
+        select count(t.id) from <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client t where t.is_delete = 0
+    </select>
+
+    <!--联盟客户信息查询  暂定 TODO-->
+    <select id="queryObject" resultType="com.cofco.sys.entity.members.AllianceClientEntity">
+        select t.* from <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client t where t.is_delete = 0 and t.id = #{id}
+    </select>
+
+    <!--联盟客户log信息查询-->
+    <select id="clientSeqLog" resultType="String">
+        select SEQ_ALLIANCE_CLIENT_LOG.nextval from dual
+    </select>
+
+    <!--联盟客户信息查询-->
+    <select id="clientSeq" resultType="String">
+        select seq_alliance_client.nextval from dual
+    </select>
+
+    <!-- 查询当前联盟成员下是否包含联盟客户-->
+    <select id="containNums" parameterType="string" resultType="int">
+        select count(t.memberId) from <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client t
+          WHERE MEMBERID = #{memberId}
+    </select>
+
+    <!--联盟客户注册-->
+    <insert id="save" parameterType="com.cofco.sys.entity.members.AllianceClientEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client
+        (
+        ID,
+        MEMBERID,
+        CLIENTNAME,
+        CLIENTADDR,
+        CLIENTTEL,
+        CLIENTORGNO,
+        CLIENTORGATTACH,
+        REGMONEY,
+        BANKINFO,
+        PROPERTY,
+        CORPORATENAME,
+        CORPORATETEL,
+        CORPORATEID,
+        CORPORATEIDATTACH,
+        CONTACTNAME,
+        CONTACTTEL,
+        CONTACTID,
+        CONTACTIDATTACH,
+        VERSION,
+        TIME_CREATE,
+        CREATOR,
+        TIME_MODIFY,
+        MODIFIER
+        )
+        values
+        (
+        #{id},
+        #{memberId},
+        #{clientName},
+        #{clientAddr},
+        #{clientTel},
+        #{clientOrgNo},
+        #{clientOrgAttach},
+        #{regMoney},
+        #{bankInfo},
+        #{property},
+        #{corporateName},
+        #{corporateTel},
+        #{corporateId},
+        #{corporateIdAttach},
+        #{contactName},
+        #{contactTel},
+        #{contactId},
+        #{contactIdAttach},
+        #{version},
+        #{timeCreate},
+        #{creator},
+        #{timeModify},
+        #{modifier}
+        )
+    </insert>
+
+    <!--联盟客户日志表-->
+    <insert id="saveLog" parameterType="com.cofco.sys.entity.members.AllianceClientLogEntity">
+        insert into <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client_log
+        (
+        ID,
+        ALLIANCE_CLIENT_ID,
+        TEMPID,
+        OPERATORTYPE,
+        AUDITSTATUS
+        )
+        values
+        (
+        SEQ_ALLIANCE_CLIENT_LOG.NEXTVAL,
+        #{allianceClientId},
+        #{tempId},
+        #{operatorType},
+        #{auditStatus}
+        )
+    </insert>
+
+    <!--联盟客户日志表更新-->
+    <update id="updateLog" parameterType="com.cofco.sys.entity.members.AllianceClientLogEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client_log
+        <set>
+            <if test="auditStatus != null">auditStatus = #{auditStatus} </if>
+        </set>
+        where tempId = #{tempId}
+    </update>
+
+    <!--联盟客户号更新-->
+    <update id="updateClientId" parameterType="java.lang.String">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client
+        <set>
+            <if test="clientId != null">clientId = #{clientId} </if>
+        </set>
+        where id = (select t.alliance_Client_Id from <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client_log t where t.tempId = #{clientTmpId} )
+    </update>
+
+    <!--联盟客户信息修改-->
+    <update id="update" parameterType="com.cofco.sys.entity.members.AllianceClientEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client
+        <set>
+            <if test="clientId != null">clientId = #{clientId}, </if>
+            <if test="memberId != null">memberId = #{memberId}, </if>
+            <if test="clientName != null">clientName = #{clientName}, </if>
+            <if test="clientAddr != null">clientAddr = #{clientAddr}, </if>
+            <if test="clientTel != null">clientTel = #{clientTel}, </if>
+            <if test="clientOrgNo != null">clientOrgNo = #{clientOrgNo}, </if>
+            <if test="clientOrgAttach != null">clientOrgAttach = #{clientOrgAttach}, </if>
+            <if test="regMoney != null">regMoney = #{regMoney}, </if>
+            <if test="bankInfo != null">bankInfo = #{bankInfo}, </if>
+            <if test="property != null">property = #{property}, </if>
+            <if test="corporateName != null">corporateName = #{corporateName}, </if>
+            <if test="corporateTel != null">corporateTel = #{corporateTel}, </if>
+            <if test="corporateId != null">corporateId = #{corporateId}, </if>
+            <if test="corporateIdAttach != null">corporateIdAttach = #{corporateIdAttach}, </if>
+            <if test="contactName != null">contactName = #{contactName}, </if>
+            <if test="contactTel != null">contactTel = #{contactTel}, </if>
+            <if test="contactId != null">contactId = #{contactId}, </if>
+            <if test="contactIdAttach != null">contactIdAttach = #{contactIdAttach}, </if>
+            <if test="version != null">version = #{version}, </if>
+            <if test="timeModify != null">time_modify = #{timeModify}, </if>
+            <if test="timeCreate != null">timeCreate = #{timeCreate}, </if>
+            <if test="creator != null">creator = #{creator}, </if>
+            <if test="isDelete != null">isDelete = #{isDelete}, </if>
+            <if test="propertyName != null">property = #{propertyName}, </if>
+            <if test="modifier != null">modifier = #{modifier}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--联盟客户信息删除-->
+    <update id="delete" parameterType="com.cofco.sys.entity.members.AllianceClientEntity">
+        update <include refid="com.cofco.base.dao.JdbcUserName"/>alliance_client set is_delete = #{isDelete} where id = #{id}
+    </update>
+</mapper>

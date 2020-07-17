@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>获取经纬度</title>
+  <meta name="description" content="百度地图地点搜索和鼠标点击地点获取经纬度，这些都是地图比较基本和实用的代码，其中还包括了根据用户IP进行地图的显示、改变地图上的鼠标样式、启用滚轮缩放" /> 
+  <meta name="keywords" content="百度地图,地点搜索,获取经纬度,改变地图鼠标样式,启用滚轮缩放" /> 
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.2"></script>
+</head>
+<body onload = "getparam();">
+<form action="" method="get">
+  <label >地点：</label>
+  <input id="where" name="where" type="text" >
+  <input type="button" value="地图上找" onClick="smap.sear(document.getElementById('where').value);" />
+  经纬度：
+  <input id="lonlat" name="lonlat" type="text" >
+  <input type="button" value="确定选中" onclick="JavaScript:window.opener.document.getElementById('lonlatCopy').value=document.getElementById('lonlat').value;window.close();"  />
+  <div style="width:600px;height:500px;border:1px solid gray" id="container"></div>
+</form>
+
+
+<script src="${rc.contextPath}/statics/js/organ/map.js?_${date.systemTime}"></script>
+<script type="text/javascript">
+    smap.init();
+</script>
+<style type="text/css">
+  .anchorBL{
+    display:none;
+  }
+</style>
+</body>
+</html>

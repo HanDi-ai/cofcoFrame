@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>仓单备案</title>
+    #parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2">
+                <input  type="hidden"  @keyup.enter="query" v-model="q.organId" >
+                <div class="form-group">
+                    <input class="form-control" v-model="q.varietyName" @keyup.enter="query" placeholder="客户名称">
+                </div>
+            </div>
+
+            <button class="layui-btn" id="searchSubmit" @click="query"><i class="layui-icon">&#xe615;</i>查 询</button>
+
+          <!--  <button class="layui-btn" @click="add" type="button"><i class="layui-icon">&#xe61f;</i> 新 增</button>-->
+
+            <button class="layui-btn layui-btn-normal" type="button" @click="update"><i class="layui-icon">&#xe642;</i>编辑</button>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+        <div id="page"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">仓单类型<span style="color: red">*</span></div>
+                <label class="radio-inline">
+                    <input type="radio" name="wbillType" value="0" v-model="role.wbillType"/> 联盟
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="wbillType" value="1" v-model="role.wbillType"/> 非联盟/其他
+                </label>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">是否标准仓单<span style="color: red">*</span></div>
+                <label class="radio-inline">
+                    <input type="radio" name="isStandard" value="0" v-model="role.isStandard"/> 标准
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isStandard" value="1" v-model="role.isStandard"/> 非标准/其他
+                </label>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">仓库仓单编号<span style="color: red">*</span></div>
+                <div class="col-sm-10">
+                    <input class="form-control" v-model="role.whWbillId" placeholder="仓库仓单编号"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">品种代码<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.varietyId" placeholder="品种代码"/>
+                </div>
+                <div class="col-sm-2 control-label">品种名称<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.varietyName" placeholder="品种名称"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">是否包装<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.packageType" placeholder="是否包装"/>
+                </div>
+                <div class="col-sm-2 control-label">数量<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.counts" placeholder="数量"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">重量<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.weight" placeholder="重量"/>
+                </div>
+                <div class="col-sm-2 control-label">是否标记<span style="color: red">*</span></div>
+                <label class="radio-inline">
+                    <input type="radio" name="isMarked" value="0" v-model="role.isMarked"/> 否
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isMarked" value="1" v-model="role.isMarked"/> 是
+                </label>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">标记内容<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.markContent" placeholder="标记内容"/>
+                </div>
+                <div class="col-sm-2 control-label">产地<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.productArea" placeholder="产地"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">品质<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.quality" placeholder="品质"/>
+                </div>
+                <div class="col-sm-2 control-label">检验检疫是否生效<span style="color: red">*</span></div>
+                <label class="radio-inline">
+                    <input type="radio" name="isInspected" value="0" v-model="role.isInspected"/> 否
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isInspected" value="1" v-model="role.isInspected"/> 是
+                </label>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">检验机构名称<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.inspectionOrgName" placeholder="检验机构名称"/>
+                </div>
+                <div class="col-sm-2 control-label">检验机构组织机构代码<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.inspectionOrgNo" placeholder="检验机构组织机构代码"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">检验检疫证明<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.inspectionAttach" placeholder="检验检疫证明"/>
+                </div>
+                <div class="col-sm-2 control-label">检验检疫生效日期<span style="color: red">*</span></div>
+                <!--<div class="col-sm-3">
+                    <input class="form-control"  id="inspectedBeginDate"  v-model="role.inspectedBeginDate"  placeholder="检验检疫生效日期">
+                </div>-->
+                <div class="col-sm-3">
+                    <input  class="form-control" id="inspectedBeginDate" v-model="role.inspectedBeginDate" placeholder="检验检疫生效日期">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">检验检疫失效日期<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control"  id="inspectedEndDate"  v-model="role.inspectedEndDate" placeholder="检验检疫失效日期">
+                </div>
+                <div class="col-sm-2 control-label">垛位信息<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.locationInfo" placeholder="垛位信息"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">仓储起始日期<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="layui-input"  id="storeBeginDate"  v-model="role.storeBeginDate" type="text" placeholder="仓储起始日期">
+                </div>
+
+                <div class="col-sm-2 control-label">仓储终止日期<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="layui-input"  id="storeEndDate"  v-model="role.storeEndDate" type="text" placeholder="仓储终止日期">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">仓储费用<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.storageFee" placeholder="仓储费用"/>
+                </div>
+                <div class="col-sm-2 control-label">损耗标准<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.lossStandard" placeholder="损耗标准"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">仓储机构经办人姓名<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.operatorName" placeholder="仓储机构经办人姓名"/>
+                </div>
+                <div class="col-sm-2 control-label">仓储机构经办人电话<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.operatorTel" placeholder="仓储机构经办人电话"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">货主联盟客户代码<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.clientId" placeholder="货主联盟客户代码"/>
+                </div>
+                <div class="col-sm-2 control-label">货主联系人姓名<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.clientContactName" placeholder="货主联系人姓名"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">货主联系人电话<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.clientContactTel" placeholder="货主联系人电话"/>
+                </div>
+                <div class="col-sm-2 control-label">是否有保险<span style="color: red">*</span></div>
+                <label class="radio-inline">
+                    <input type="radio" name="isInsurance" value="0" v-model="role.isInsurance"/> 否
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="isInsurance" value="1" v-model="role.isInsurance"/> 是
+                </label>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">保险公司名称<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.insuranceOrg" placeholder="保险公司名称"/>
+                </div>
+                <div class="col-sm-2 control-label">保险公司组织机构代码<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.insuranceOrgNo" placeholder="保险公司组织机构代码"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">保险公司联系人姓名<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.insuranceContact" placeholder="保险公司联系人姓名"/>
+                </div>
+                <div class="col-sm-2 control-label">保险公司联系人电话<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="form-control" v-model="role.insuranceContactTel" placeholder="保险公司联系人电话"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">保险生效日期<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="layui-input"  id="insuranceBeginDate"  v-model="role.insuranceBeginDate" type="text" placeholder="保险生效日期">
+                </div>
+                <div class="col-sm-2 control-label">保险失效日期<span style="color: red">*</span></div>
+                <div class="col-sm-3">
+                    <input class="layui-input"  id="insuranceEndDate"  v-model="role.insuranceEndDate" type="text" placeholder="保险失效日期">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-left: 30%;margin-top: 30px;">
+                <button class="layui-btn" type="button" @click="saveOrUpdate" >确定</button>
+                <button class="layui-btn layui-btn-warm" type="button" @click="reload" style="margin-left: 30px">返回</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 选择机构 -->
+<div id="menuLayer" style="display: none; position: 10px;">
+    <ul id="organTree" class="ztree"></ul>
+</div>
+<script src="${rc.contextPath}/statics/js/members/billinfo.js"></script>
+</body>
+</html>

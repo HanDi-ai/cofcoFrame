@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>管理员列表</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+		<div v-show="showList">
+			<div class="grid-btn">
+				<div class="form-group col-sm-2">
+					<input class="form-control" v-model="q.userName" @keyup.enter="query" placeholder="用户名">
+				</div>
+				<button class="layui-btn" type="button" id="searchSubmit" @click="query"><i class="layui-icon">&#xe615;</i>查 询</button>
+				<button class="layui-btn" @click="add" type="button"><i class="layui-icon">&#xe61f;</i> 用户角色授予</button>
+			</div>
+			<table id="jqGrid"></table>
+			<div id="jqGridPager"></div>
+			<div id="page"></div>
+		</div>
+
+		<div  class="panel panel-default" v-show="!showList">
+			<div class="panel panel-default" >
+			<input type="hidden" id="user_id"/>
+				<div class="panel-heading">{{title}}<span style="margin-left: 35%" id="username_div"></span></div>
+					<div class="row">
+						<div class="col-md-5">
+							<div class="form-group" >
+								<div class="layui-bg-green col-sm-2" >已拥有角色</div>
+							</div>
+							<div class="form-group" >
+								<div class="col-sm-5">
+									<input class="form-control" placeholder="角色名" @keyup.enter="queryR" v-model="q.roleNameR" />
+								</div>
+								<button class="layui-btn" type="button" @click="queryR"><i class="layui-icon">&#xe615;</i>查 询</button>
+							</div>
+							<table id="jqGrid2"></table>
+							<div id="jqGridPager2"></div>
+						</div>
+
+						<div class="col-md-2" align="center">
+							<div class="form-group lendChoicetop">
+							<button class="layui-btn"  type="button"  @click="branch"><i class="layui-icon">&#xe65a;</i></button>
+							</div>
+							<div class="lendChoice">
+							</div>
+							<div class="form-group" >
+							<button class="layui-btn" type="button"  @click="relieve"><i class="layui-icon">&#xe65b;</i></button>
+							</div>
+						</div>
+
+						<div class="col-md-5" id="wid">
+							<div class="form-group" >
+								<div class="layui-bg-green col-sm-2" >未拥有角色</div>
+							</div>
+							<div class="form-group" >
+								<div class="col-sm-5">
+									<input class="form-control" v-model="q.roleNameL"  @keyup.enter="queryR" placeholder="角色名"/>
+								</div>
+								<button class="layui-btn" type="button"  @click="queryL"><i class="layui-icon">&#xe615;</i>查 询</button>
+							</div>
+							<table id="jqGrid1"></table>
+							<div id="jqGridPager1"></div>
+						</div>
+					</div>
+				<div class="form-group" align="right" >
+					<button class="layui-btn layui-btn-warm" type="button" @click="reload">返回</button>
+				</div>
+			</div>
+		</div>
+</div>
+<script src="${rc.contextPath}/statics/js/user/userGrantRoles.js?_${date.systemTime}"></script>
+</body>
+</html>

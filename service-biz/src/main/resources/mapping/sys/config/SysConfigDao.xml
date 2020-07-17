@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+<mapper namespace="com.cofco.sys.dao.config.SysConfigDao">
+	<resultMap type="com.cofco.sys.entity.config.SysConfigEntity" id="configMap">
+		<result property="id" column="id"/>
+		<result property="key" column="key"/>
+		<result property="value" column="value"/>
+		<result property="status" column="status"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+
+	<sql id="Base_Column_List" >
+		id,
+		key,
+		value,
+		status,
+		remark
+    </sql>
+	<select id="queryObject" resultType="com.cofco.sys.entity.config.SysConfigEntity">
+		select * from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_config where id = #{id}
+	</select>
+	
+	<select id="queryList" parameterType="map" resultType="com.cofco.sys.entity.config.SysConfigEntity">
+		select * from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_config where status = '1'
+		<if test="key != null and key.trim() != ''">
+			and "KEY" like concat(concat('%',#{key}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="queryTotal" parameterType="map" resultType="int">
+		select count(*) from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_config where status = '1'
+		<if test="key != null and key.trim() != ''">
+			and "KEY" like concat(concat('%',#{key}),'%')
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="save" parameterType="com.cofco.sys.entity.config.SysConfigEntity">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			select <include refid="com.cofco.base.dao.JdbcUserName"/>SYS_CONFIG_SEQUENCE.NEXTVAL from dual
+		</selectKey>
+		insert into sys_config(id,key, value, status,remark)
+			values(#{id},#{key},#{value},'1',#{remark})
+	</insert>
+	
+	<update id="update" parameterType="com.cofco.sys.entity.config.SysConfigEntity">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_config set key = #{key}, value = #{value}, remark = #{remark}
+			 where id = #{id}
+	</update>
+	
+	<!-- 根据key，更新value -->
+	<update id="updateValueByKey" parameterType="map">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_config set `value` = #{value} where `key` = #{key}
+	</update>
+	
+	<!-- 根据key，查询value -->
+	<select id="queryByKey" parameterType="string" resultType="string">
+		select value from sys_config where `key` = #{key}
+	</select>
+	
+	<delete id="deleteBatch" parameterType="int">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_config where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+</mapper>

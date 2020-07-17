@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>管理员列表</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+		<div  class="panel panel-default" >
+			<div class="panel-heading">借调</div>
+					<div class="row">
+                                <div class="col-md-5" >
+                                    <input type="hidden" id="organ_left_id"/>
+                                    <input type="hidden" id="organ_left_name"/>
+                                    <div class="form-group" >
+                                        <div class="layui-bg-green col-sm-2" >借调机构</div>
+                                    </div>
+                                    <div class="form-group" >
+                                        <div class="col-sm-5">
+                                            <input class="form-control" id="MenuLeft" readonly  v-model="q.old_organ_Name" @click="organTreeleft" placeholder="选择机构"/>
+                                        </div>
+                                        <button class="layui-btn"  @click="queryL"><i class="layui-icon">&#xe615;</i>查 询</button>
+                                    </div>
+                                    <table id="jqGrid1"></table>
+                                    <div id="jqGridPager1"></div>
+                                </div>
+                                <div class="col-md-2" align="center" >
+                                    <div class="form-group lendChoicetop">
+                                        <button class="layui-btn"    @click="Toloan"><i class="layui-icon">&#xe65a;</i></button>
+                                    </div>
+                                    <div class="lendChoice">
+                                    </div>
+                                    <div class="form-group" >
+                                    <button class="layui-btn"   @click="relieve"><i class="layui-icon">&#xe65b;</i></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-5" >
+                                    <input type="hidden" id="organ_right_id"/>
+                                        <input type="hidden" id="organ_right_name"/>
+                                            <div class="form-group" >
+                                                <div class="layui-bg-green col-sm-2" >原机构</div>
+                                            </div>
+                                    <div class="form-group" >
+                                            <div class="col-sm-5">
+                                                <input class="form-control"  readonly id="MenuRight"  v-model="q.new_organ_Name" @click="organTreeRight"  placeholder="选择机构"/>
+                                            </div>
+
+                                        <button class="layui-btn"  @click="queryR"><i class="layui-icon">&#xe615;</i>查 询</button>
+                                    </div>
+                                    <table id="jqGrid2"></table>
+                                    <div id="jqGridPager2"></div>
+                                </div>
+
+                    </div>
+
+            <div class="form-group" >
+
+            </div>
+		</div>
+</div>
+
+<!-- 选择机构 -->
+<div id="menuLayerL" class="menuContent" style="display:none; position: absolute;">
+	<ul id="organTreeL" class=" ztree" style="margin-top:0;"></ul>
+</div>
+
+<div id="menuLayerR" class="menuContent" style="display:none; position: absolute;">
+    <ul id="organTreeR" class="ztree" style="margin-top:0;"></ul>
+</div>
+<script src="${rc.contextPath}/statics/js/organ/Lend.js?_${date.systemTime}"></script>
+</body>
+</html>

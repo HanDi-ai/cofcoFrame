@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cofco.sys.dao.log.SysLogDao">
+	<resultMap type="com.cofco.sys.entity.log.SysLogEntity" id="logMap">
+		<result property="id" column="id"/>
+		<result property="username" column="username"/>
+		<result property="operation" column="operation"/>
+		<result property="method" column="method"/>
+		<result property="ip" column="ip"/>
+		<result property="createDate" column="create_date"/>
+		<result property="params" column="params"/>
+		<result property="result" column="result"/>
+		<result property="sign" column="sign"/>
+	</resultMap>
+	<sql id="Base_Column_List" >
+		id,
+		username,
+		operation,
+		method,
+		ip,
+		create_date,
+		params，
+		sign,
+		result
+    </sql>
+
+	<select id="queryObject" resultType="com.cofco.sys.entity.log.SysLogEntity">
+		select * from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_log where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.cofco.sys.entity.log.SysLogEntity" resultMap="logMap">
+		select <include refid="Base_Column_List" />
+		from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_log
+		<where>
+			<if test="key != null and key.trim() != ''">
+				username like concat(concat('%',#{key}),'%') or operation like concat(concat('%',#{key}),'%')
+			</if>
+			<if test="starttime != null and starttime.trim() != '' ">
+				AND CREATE_DATE >= to_date(#{starttime},'yyyy-mm-dd hh24:mi:ss')
+
+			</if>
+			<if test="startend != null and startend.trim() != ''">
+				AND CREATE_DATE <![CDATA[<=]]> to_date(#{startend},'yyyy-mm-dd hh24:mi:ss')
+			</if>
+			<if test="sign != null and sign.trim() != ''">
+				AND sign=#{sign}
+			</if>
+		</where>
+		order by create_date desc
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_log
+		<where>
+			<if test="key != null and key.trim() != ''">
+				username like concat('%',#{key},'%') or operation like concat('%',#{key},'%')
+			</if>
+			<if test="starttime != null and starttime.trim() != '' ">
+				AND CREATE_DATE >= to_date(#{starttime},'yyyy-mm-dd hh24:mi:ss')
+
+			</if>
+			<if test="startend != null and startend.trim() != ''">
+				AND CREATE_DATE <![CDATA[<=]]> to_date(#{startend},'yyyy-mm-dd hh24:mi:ss')
+			</if>
+		</where>
+	</select>
+
+	<insert id="save" parameterType="com.cofco.sys.entity.log.SysLogEntity">
+		insert into <include refid="com.cofco.base.dao.JdbcUserName"/>sys_log
+		(
+		id,
+		username,
+		operation,
+		method,
+		params,
+		result,
+		ip,
+		create_date,
+		sign
+		)
+		values
+		(
+		#{id},
+		#{username},
+		#{operation},
+		#{method},
+		#{params},
+		#{result,jdbcType=CLOB},
+		#{ip},
+		#{createDate},
+		#{sign}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.cofco.sys.entity.log.SysLogEntity">
+		update <include refid="com.cofco.base.dao.JdbcUserName"/>sys_log
+		<set>
+			<if test="username != null">username = #{username}, </if>
+			<if test="operation != null">operation = #{operation}, </if>
+			<if test="method != null">method = #{method}, </if>
+			<if test="params != null">params = #{params}, </if>
+			<if test="ip != null">ip = #{ip} </if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_log where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from <include refid="com.cofco.base.dao.JdbcUserName"/>sys_log where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>
