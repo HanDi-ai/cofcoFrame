@@ -1516,7 +1516,7 @@ public class BillController extends BaseController {
         int id = billService.seqBillOperatorId();
         //操作表
         billOperatorEntity.setId(String.valueOf(id));
-        //质押预冻结提交，仓库锁货中
+        //质押1预冻结提交，仓库锁货中
         billOperatorEntity.setOperatorType(Const.PRE_FREEZING);
         billOperatorEntity.setPledgerMemberId(list.get(0).getWhMemberId());
         billOperatorEntity.setMemberType("1");
