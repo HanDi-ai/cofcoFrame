@@ -20,7 +20,7 @@
     <properties>
         <spring.version>4.3.7.RELEASE</spring.version>
         <javaee.api.version>7.0</javaee.api.version>
-        <mysql.connector.version>5.1.30</mysql.connector.version>
+        <mysql.connector.version>8.0.16</mysql.connector.version>
         <mybatis.version>3.4.0</mybatis.version>
         <mybatis.spring.version>1.3.0</mybatis.spring.version>
         <mybatis.generator.version>1.3.2</mybatis.generator.version>
