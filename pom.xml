@@ -18,7 +18,7 @@
         <module>service-redis</module> <!--缓存模块-->
     </modules>
     <properties>
-        <spring.version>4.3.7.RELEASE</spring.version>
+        <spring.version>5.2.20.RELEASE</spring.version>
         <javaee.api.version>7.0</javaee.api.version>
         <mysql.connector.version>5.1.30</mysql.connector.version>
         <mybatis.version>3.4.0</mybatis.version>
